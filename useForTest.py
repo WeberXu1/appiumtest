@@ -21,7 +21,7 @@ class AppTest(unittest.TestCase):
 
     def test_putupdatetoscreen(self):
         common.enable_fota_advance(self.wd, "FOTA")
-
+#cocososo
 
     def tearDown(self):
 
