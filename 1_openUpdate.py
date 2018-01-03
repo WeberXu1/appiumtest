@@ -84,4 +84,9 @@ class AppTest(unittest.TestCase):
         self.assertEqual(self.wd.current_activity, ".SystemUpdatesActivity")
         s4_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/openupdates_4.log')
         common.write_logs(s1_logs + s2_logs + s3_logs + s4_logs ,'D:/test/logs/openupdates_total.log' )
-    cc
+
+    def tearDown(self):
+        self.wd.quit()
+
+if __name__ == '__main__':
+    unittest.main()

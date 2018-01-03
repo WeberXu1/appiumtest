@@ -19,8 +19,8 @@ def capabilities_set():
     capabilities['unicodeKeyboard'] = 'True'
     capabilities['resetKeyboard'] = 'True'
     capabilities['appPackage'] = 'com.tcl.ota'
-    capabilities['appActivity'] = 'com.tcl.ota.SystemUpdatesActivity'
-    capabilities['app'] = 'C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\Fota_Global_v7.0.10.3.0626.0_signed_platformkey_alldpi.apk'
+    #capabilities['appActivity'] = 'com.tcl.ota.SystemUpdatesActivity'
+    #capabilities['app'] = 'C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\Fota_Global_v7.0.10.3.0626.0_signed_platformkey_alldpi.apk'
     capabilities['noReset'] = 'True'
     capabilities['noSign'] = 'True'
     return capabilities
@@ -165,5 +165,8 @@ class CantFindAppException(Exception):
     def __init__(self, err='Can not open update or update is not in app list'):
         Exception.__init__(self, err)
 
+class CantSearchedFotaPackage(Exception):
+    def __init__(self, err='Can not searched FOTA package,please check the network and GOTU setting'):
+        Exception.__init__(self, err)
 
 
