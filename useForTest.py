@@ -21,7 +21,8 @@ class AppTest(unittest.TestCase):
 
     def test_putupdatetoscreen(self):
         self.wd.set_network_connection(0)
-        #need to clear the app's data.
+        self.wd.reset()
+        #need to clear the app's data.ok
         common.enable_fota_advance(self.wd, "FOTA")
         self.wd.find_element_by_accessibility_id("More options").click()
         self.wd.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
@@ -39,7 +40,7 @@ class AppTest(unittest.TestCase):
             except NoSuchElementException,e:
                 pass
             else:
-                svn_value = self.wd.find_element_by_id(com.tcl.ota:id/firmware_system_version).text()
+                svn_value = self.wd.find_element_by_id("com.tcl.ota:id/firmware_system_version").text()
                 self.assertEqual(svn_value,"6.0-01001")
                 package_size = self.wd.find_element_by_id("com.tcl.ota:id / firmware_state_message_extra").text()
                 self.assertEqual(package_size,"20171219_135255?(76.5 MB)")
@@ -54,7 +55,53 @@ class AppTest(unittest.TestCase):
             if i > 4:
                 raise common.CantSearchedFotaPackage
 
+        #Notification check
+        time.sleep(5)
+        self.wd.open_notifications()
+        try:
+            fota_noti = self.wd.find_elements_by_android_uiautomator(
+                'new UiSelector().text("System update available")')
+        except NoSuchElementException,e:
+            pass
+        else:
+            fota_noti.click()
 
+        self.assertEqual(self.wd.current_activity, ".SystemUpdatesActivity")
+        self.wd.keyevent(3)
+        self.wd.open_notifications()
+
+        #point "Download" in different ways
+        self.wd.find_elements_by_android_uiautomator(
+                'new UiSelector().package("com.tcl.ota").text("Download")').click()
+        common.delete_fotapac(self.wd)
+        self.wd.launch_app()
+        for i in range(1,5):   #point download button
+            try:
+                download_dutton = self.wd.find_element_by_id("com.tcl.ota:id / firmware_update")
+            except NoSuchElementException,e:
+                pass
+            else:
+                download_dutton.click()
+                break
+            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright").click()
+            time.sleep(10)
+            if i >= 4:
+                raise common.CantSearchedFotaPackage
+
+        common.delete_fotapac(self.wd)
+        self.wd.launch_app()
+        for i in range(1,5):   #point download image icon
+            try:
+                download_dutton = self.wd.find_element_by_id("com.tcl.ota:id / firmware_update")
+            except NoSuchElementException, e:
+                pass
+            else:
+                self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright").click()
+                break
+            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright").click()
+            time.sleep(10)
+            if i >= 4:
+                raise common.CantSearchedFotaPackage
 
 
 

@@ -161,6 +161,55 @@ def enable_fota_advance(device,type):
         print "failed to open fota advance mode"
         return False
 
+
+
+def delete_fotapac(device):
+    device.launch_app()
+    device.find_element_by_accessibility_id("More options").click()
+    device.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
+    try:
+        delete_icon = device.find_element_by_id("com.tcl.ota:id/pref_button")
+    except NoSuchElementException,e:
+        return False
+    else:
+        delete_icon.click()
+        time.sleep(2)
+        device.find_element_by_android_uiautomator('new UiSelector().text("Delete")').click()
+        return True
+
+def click_checkfota(device,buttontype):
+    device.set_network_connection(0)
+    if not delete_fotapac(device):
+        return False
+    device.keyevent(4)
+    device.set_network_connection(2)
+    for i in range(1, 5):  # point download button
+        try:
+            download_dutton = device.find_element_by_id("com.tcl.ota:id / firmware_update")
+        except NoSuchElementException, e:
+            pass
+        else:
+            if(buttontype == 0):        #point download button
+                return download_dutton
+            if(buttontype == 1):        #point download image icon
+                return device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
+            if(buttontype == 2):        #point download in notification bar
+                self.wd.open_notifications()
+                try:
+                    device.find_elements_by_android_uiautomator(
+                        'new UiSelector().text("System update available")')
+                except NoSuchElementException, e:
+                    print "there are no notification "
+                else:
+                    return device.find_elements_by_android_uiautomator(
+                        'new UiSelector().package("com.tcl.ota").text("Download")').click()
+            break
+        device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright").click()
+        time.sleep(10)
+        if i >= 4:
+            raise CantSearchedFotaPackage
+
+
 class CantFindAppException(Exception):
     def __init__(self, err='Can not open update or update is not in app list'):
         Exception.__init__(self, err)

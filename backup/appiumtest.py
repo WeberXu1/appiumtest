@@ -28,3 +28,27 @@ driver.swipe(100, 500, 100, 100, 2)
 # driver.find_element_by_name('Save').click()
 driver.quit()
 print "finished"
+
+#Later function
+# self.wd.find_elements_by_android_uiautomator('new UiSelector().package("com.tcl.ota").text("LATER")').click()
+# bettery_num2 = common.get_bettery(self.wd)
+# if bettery_num2 > 95 and bettery_num2 < 100:
+#     for i in range(1,4):
+#         time.sleep(1800)
+#         bettery_num3 = common.get_bettery(self.wd)
+#         if bettery_num3 == 100:
+#             break
+# try:
+#     fota_noti1 = self.wd.find_elements_by_android_uiautomator('new UiSelector().text("System update available")')
+# except NoSuchElementException,e:
+#     print "Later function failed"
+# else:
+#     pass
+
+
+# def get_bettery(device):
+#     device.open_notifications()
+#     bettery_elm = device.find_element_by_id("com.android.systemui:id/battery")
+#     bettery_num = bettery_elm.get_attribute('name')
+#     bettery_num1 = bettery_num.encode('gbk')
+#     return int(filter(str.isdigit, bettery_num1))
