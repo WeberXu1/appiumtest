@@ -16,8 +16,80 @@ class AppTest(unittest.TestCase):
 
     def test_fotanoautodownload(self):
         s1_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/openupdates_1.log')
-        common.write_logs(s1_logs, 'D:/test/logs/openupdates_total.log')
 
+        self.wd.set_network_connection(0)
+        self.wd.reset()
+        # need to clear the app's data.ok
+        common.enable_fota_advance(self.wd, "FOTA")
+        self.wd.find_element_by_accessibility_id("More options").click()
+        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
+        elm1 = self.wd.find_element_by_class_name("android.widget.Switch")
+        if elm1[0].text().equal("On"):
+            elm1.click()
+        self.wd.keyevent(4)
+        time.sleep(2)
+        self.wd.set_network_connection(2)
+        for i in range(1, 6):
+            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright").click()
+            time.sleep(5)
+            try:
+                elm2 = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update")
+            except NoSuchElementException, e:
+                pass
+            else:
+                svn_value = self.wd.find_element_by_id("com.tcl.ota:id/firmware_system_version").text()
+                self.assertEqual(svn_value, "6.0-01001")
+                package_size = self.wd.find_element_by_id("com.tcl.ota:id / firmware_state_message_extra").text()
+                self.assertEqual(package_size, "20171219_135255?(76.5 MB)")
+                state_message = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message")
+                self.assertEqual(state_message, "System update available")
+                self.wd.find_element_by_id("com.tcl.ota:id/firmware_info").click()
+                detail_title = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_title_shadow")
+                self.assertEqual(detail_title, "New in this version")
+                detail_content = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_content")
+                self.assertEqual(detail_content, "UPDATE TO A8")
+                self.wd.keyevent(4)
+            if i > 4:
+                raise common.CantSearchedFotaPackage
+
+        # Notification check
+        time.sleep(5)
+        self.wd.open_notifications()
+        try:
+            fota_noti = self.wd.find_elements_by_android_uiautomator(
+                'new UiSelector().text("System update available")')
+        except NoSuchElementException, e:
+            pass
+        else:
+            fota_noti.click()
+
+        self.assertEqual(self.wd.current_activity, ".SystemUpdatesActivity")
+        self.wd.keyevent(3)
+        self.wd.open_notifications()
+
+        # point "Download" in different ways
+        self.wd.find_elements_by_android_uiautomator(
+            'new UiSelector().package("com.tcl.ota").text("Download")').click()
+        self.wd.launch_app()
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").text(), "PAUSE")
+
+        common.click_checkfota(self.wd, 0, 2)  # point download button
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").text(), "PAUSE")
+        common.click_checkfota(self.wd, 1, 2)  # point download image icon
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").text(), "PAUSE")
+
+        common.click_checkfota(self.wd, 0, 0)  # point download when no network
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").text(), "No internet connection")
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_state_message_extra").text()[0:23], "Couldn't start download")
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").text(), "TRY AGAIN")
+
+        common.click_checkfota(self.wd, 0, 4)  # point download when only data nerwork
+
+
+        #common.fill_ram()     #now will not add the fill ram function
+        #common.click_checkfota(self.wd, 0, 2)
+
+        common.write_logs(s1_logs, 'D:/test/logs/openupdates_total.log')
     def tearDown(self):
         self.wd.quit()
 

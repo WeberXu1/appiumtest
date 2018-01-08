@@ -177,7 +177,7 @@ def delete_fotapac(device):
         device.find_element_by_android_uiautomator('new UiSelector().text("Delete")').click()
         return True
 
-def click_checkfota(device,buttontype):
+def click_checkfota(device,buttontype,network):
     device.set_network_connection(0)
     if not delete_fotapac(device):
         return False
@@ -189,6 +189,7 @@ def click_checkfota(device,buttontype):
         except NoSuchElementException, e:
             pass
         else:
+            device.set_network_connection(network)
             if(buttontype == 0):        #point download button
                 return download_dutton
             if(buttontype == 1):        #point download image icon
@@ -208,6 +209,20 @@ def click_checkfota(device,buttontype):
         time.sleep(10)
         if i >= 4:
             raise CantSearchedFotaPackage
+
+def fill_ram(device):
+    device.install_app("C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\fill.apk")
+    if not device.is_app_installed("com.tcl.fill"):
+        print "can not install fill.apk"
+
+    allapp_find_app(device,"fill")
+    #do fill
+
+    recent_find_app(device, "Updates")
+
+
+
+
 
 
 class CantFindAppException(Exception):
