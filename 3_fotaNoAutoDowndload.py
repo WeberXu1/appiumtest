@@ -63,7 +63,7 @@ class AppTest(unittest.TestCase):
         time.sleep(5)
         self.wd.open_notifications()
         try:
-            fota_noti = self.wd.find_elements_by_android_uiautomator(
+            fota_noti = self.wd.find_element_by_android_uiautomator(
                 'new UiSelector().text("System update available")')
         except NoSuchElementException, e:
             pass
@@ -75,8 +75,7 @@ class AppTest(unittest.TestCase):
         self.wd.open_notifications()
 
         # point "Download" in different ways
-        self.wd.find_elements_by_android_uiautomator(
-            'new UiSelector().package("com.tcl.ota").text("Download")').click()
+        self.wd.find_element_by_accessibility_id("Download").click()
         self.wd.launch_app()
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").get_attribute("text"), "PAUSE")
 
