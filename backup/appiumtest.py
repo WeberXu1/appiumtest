@@ -12,7 +12,7 @@ capabilities['unicodeKeyboard'] = 'True'
 capabilities['resetKeyboard'] = 'True'
 # 设置APP的主包名和入口类
 capabilities['appPackage'] = 'com.example.android.contactmanager'
-#capabilities['app'] = "C:\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\ContactManager.apk"
+capabilities['app'] = "C:\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\ContactManager.apk"
 capabilities['appActivity'] = '.ContactManager'
 # 初始化
 driver = webdriver.Remote('http://127.0.0.1:4723/wd/hub', capabilities)

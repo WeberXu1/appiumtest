@@ -20,6 +20,7 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
+        pass
 
 
 
