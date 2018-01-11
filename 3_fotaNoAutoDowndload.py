@@ -80,17 +80,23 @@ class AppTest(unittest.TestCase):
         self.wd.find_element_by_accessibility_id("Download").click()
         self.wd.launch_app()
         time.sleep(3)
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").get_attribute("text"), "PAUSE")
-`
-        common.click_checkfota(self.wd, 0, 2)  # point download button
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").get_attribute("text"), "PAUSE")
-        common.click_checkfota(self.wd, 1, 2)  # point download image icon
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").get_attribute("text"), "PAUSE")
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
+        download_button = common.click_checkfota(self.wd, 0, 2)# point download button
+        download_button.click()
+        time.sleep(3)
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
+        download_icon = common.click_checkfota(self.wd, 1, 2) # point download image icon
+        download_icon.click()
+        time.sleep(3)
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
 
-        common.click_checkfota(self.wd, 0, 0)  # point download when no network
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"), "No internet connection")
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_state_message_extra").get_attribute("text")[0:23], "Couldn't start download")
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").get_attribute("text"), "TRY AGAIN")
+
+        download_button = common.click_checkfota(self.wd, 0, 0)  # point download button when no network
+        download_button.click()
+        time.sleep(3)
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"), u"No internet connection")
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")[0:23], u"Couldn't start download")
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), u"TRY AGAIN")
 
         common.click_checkfota(self.wd, 0, 4)  # point download when only data nerwork
 

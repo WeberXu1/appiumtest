@@ -20,7 +20,18 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
-        pass
+        download_button = common.click_checkfota(self.wd, 0, 0)
+        print "%r" %download_button
+        download_button.click()
+        time.sleep(3)
+
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"),
+                         u"No internet connection")
+        self.assertEqual(
+            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")[0:23],
+            u"Couldn't start download")
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
+                         u"TRY AGAIN")
 
 
 

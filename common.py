@@ -11,6 +11,9 @@ from datetime import datetime
 
 By.ACCESSIBILITY_ID = MobileBy.ACCESSIBILITY_ID
 By.ANDROID_UIAUTOMATOR = MobileBy.ANDROID_UIAUTOMATOR
+fota_cu = "8090-V1FOTA0"
+fota_fv = "8EA2ZZ20"
+fota_imei = "358511032234522"
 def capabilities_set():
     capabilities = {}
     capabilities['platformName'] = 'Android'
@@ -170,43 +173,49 @@ def delete_fotapac(device):
     try:
         delete_icon = device.find_element_by_id("com.tcl.ota:id/pref_button")
     except NoSuchElementException,e:
-        return False
+        pass
     else:
         delete_icon.click()
         time.sleep(2)
         device.find_element_by_android_uiautomator('new UiSelector().text("Delete")').click()
-        return True
 
 def click_checkfota(device,buttontype,network):
     device.set_network_connection(0)
-    if not delete_fotapac(device):
-        return False
+    delete_fotapac(device)
     device.keyevent(4)
     device.set_network_connection(2)
     for i in range(1, 5):  # point download button
         try:
-            download_dutton = device.find_element_by_id("com.tcl.ota:id / firmware_update")
+            download_button  = device.find_element_by_id("com.tcl.ota:id/firmware_update")
+            button_text = download_button.get_attribute("text")
         except NoSuchElementException, e:
             pass
         else:
-            device.set_network_connection(network)
-            if(buttontype == 0):        #point download button
-                return download_dutton
-            if(buttontype == 1):        #point download image icon
-                return device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
-            if(buttontype == 2):        #point download in notification bar
-                self.wd.open_notifications()
-                try:
-                    device.find_elements_by_android_uiautomator(
-                        'new UiSelector().text("System update available")')
-                except NoSuchElementException, e:
-                    print "there are no notification "
-                else:
-                    return device.find_elements_by_android_uiautomator(
-                        'new UiSelector().package("com.tcl.ota").text("Download")').click()
-            break
-        device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright").click()
-        time.sleep(10)
+            if button_text != u"CHECK FOR UPDATES NOW":
+                device.set_network_connection(network)
+                if(buttontype == 0):        #point download button
+                    return device.find_element_by_id("com.tcl.ota:id/firmware_update")
+                if(buttontype == 1):        #point download image icon
+                    return device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
+                if(buttontype == 2):        #point download in notification bar
+                    self.wd.open_notifications()
+                    try:
+                        device.find_elements_by_android_uiautomator(
+                            'new UiSelector().text("System update available")')
+                    except NoSuchElementException, e:
+                        print "there are no notification "
+                        return False
+                    else:
+                        return device.find_element_by_accessibility_id("Download")
+                break
+        while(True):
+            try:
+                search_button = device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
+            except NoSuchElementException, e:
+                time.sleep(5)
+            else:
+                search_button.click()
+                break
         if i >= 4:
             raise CantSearchedFotaPackage
 
