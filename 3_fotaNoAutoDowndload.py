@@ -34,25 +34,26 @@ class AppTest(unittest.TestCase):
         for i in range(1, 6):
 
             try:
-                elm2 = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update")
+                elm2 = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text")
             except NoSuchElementException, e:
                 pass
             else:
-                svn_value = self.wd.find_element_by_id("com.tcl.ota:id/firmware_system_version").get_attribute("text")
-                self.assertEqual(svn_value, u"6.0-01007")
-                package_size = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")
-                print "%r" %package_size
-                self.assertEqual(package_size, u'01008\x08(50.5 MB)')
-                state_message = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text")
-                print "%r" %state_message
-                self.assertEqual(state_message, u"System update available")
-                #self.wd.find_element_by_id("com.tcl.ota:id/firmware_info").click()
-                #detail_title = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_title_shadow")
-                #self.assertEqual(detail_title, "New in this version")
-                #detail_content = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_content")
-                #self.assertEqual(detail_content, "UPDATE TO A8")
-                self.wd.keyevent(4)
-                break
+                if elm2 != u"CHECK FOR UPDATES NOW":
+                    svn_value = self.wd.find_element_by_id("com.tcl.ota:id/firmware_system_version").get_attribute("text")
+                    self.assertEqual(svn_value, u"6.0-01007")
+                    package_size = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")
+                    print "%r" %package_size
+                    self.assertEqual(package_size, u'01008\x08(50.5 MB)')
+                    state_message = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text")
+                    print "%r" %state_message
+                    self.assertEqual(state_message, u"System update available")
+                    #self.wd.find_element_by_id("com.tcl.ota:id/firmware_info").click()
+                    #detail_title = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_title_shadow")
+                    #self.assertEqual(detail_title, "New in this version")
+                    #detail_content = self.wd.find_element_by_id("com.tcl.ot                                                              :id/firmware_detail_content")
+                    #self.assertEqual(detail_content, "UPDATE TO A8")
+                    self.wd.keyevent(4)
+                    break
             self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright").click()
             time.sleep(20)
             if i > 4:
@@ -75,10 +76,12 @@ class AppTest(unittest.TestCase):
         self.wd.open_notifications()
 
         # point "Download" in different ways
+        time.sleep(2)
         self.wd.find_element_by_accessibility_id("Download").click()
         self.wd.launch_app()
+        time.sleep(3)
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").get_attribute("text"), "PAUSE")
-
+`
         common.click_checkfota(self.wd, 0, 2)  # point download button
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id / firmware_update").get_attribute("text"), "PAUSE")
         common.click_checkfota(self.wd, 1, 2)  # point download image icon
