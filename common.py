@@ -14,18 +14,24 @@ By.ANDROID_UIAUTOMATOR = MobileBy.ANDROID_UIAUTOMATOR
 fota_cu = "8090-V1FOTA0"
 fota_fv = "8EA2ZZ20"
 fota_imei = "358511032234522"
-def capabilities_set():
+def capabilities_set(device_num):
     capabilities = {}
+    #if device_num == 1:
+        #capabilities['platformVersion'] = '6.0'
+    #if device_num == 2:
+    capabilities['platformVersion'] = '7.0'
+    capabilities['automationName'] = 'UIAutomator2'
+
+    capabilities['unicodeKeyboard'] = 'True'
     capabilities['platformName'] = 'Android'
     capabilities['deviceName'] = 'Android Emulator'
-    capabilities['platformVersion'] = '6.0'
-    capabilities['unicodeKeyboard'] = 'True'
+    capabilities['noSign'] = 'True'
     capabilities['resetKeyboard'] = 'True'
     capabilities['appPackage'] = 'com.tcl.ota'
     capabilities['appActivity'] = 'com.tcl.ota.SystemUpdatesActivity'
     capabilities['app'] = 'C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\Fota_Global_v7.0.10.3.0626.0_signed_platformkey_alldpi.apk'
     capabilities['noReset'] = 'True'
-    capabilities['noSign'] = 'True'
+
     return capabilities
 
 def allapp_find_app(device,appname):
@@ -219,7 +225,7 @@ def click_checkfota(device,buttontype,network):
         if i >= 4:
             raise CantSearchedFotaPackage
 
-def fill_ram(device):
+def fill_ram(device):  #fill ram
     device.install_app("C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\fill.apk")
     if not device.is_app_installed("com.tcl.fill"):
         print "can not install fill.apk"
@@ -228,6 +234,19 @@ def fill_ram(device):
     #do fill
 
     recent_find_app(device, "Updates")
+
+def change_network(device,network_type):
+    if network_type == 1:
+        device.set_network_connection(network_type)
+    else:
+        device.set_network_connection(network_type)
+        self.wd.keyevent(3)
+        self.wd.open_notifications()
+        time.sleep(2)
+        common.swape_bygiven(self.wd, "dragdown")
+
+
+
 
 
 

@@ -15,23 +15,38 @@ from appium.webdriver.common.touch_action import TouchAction
 class AppTest(unittest.TestCase):
 
     def setUp(self):
-        self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub',common.capabilities_set())
+        self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub',common.capabilities_set(2))
         common.read_logs(self.wd, 'logcat', ignore=True)
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
-        download_button = common.click_checkfota(self.wd, 0, 0)
-        print "%r" %download_button
-        download_button.click()
-        time.sleep(3)
+        #network 0
+        #print "now set the network as 0"
+        #self.wd.set_network_connection(0)
+       # time.sleep(1)
+        #print self.wd.network_connection
+        #network 1
+       # print "now set the network as 1"
+        #self.wd.set_network_connection(1)
+        #time.sleep(1)
+        #print self.wd.network_connection
+        # network 2
+        print "now set the network as 2"
+        #self.wd.set_network_connection(2)
+        time.sleep(1)
+        print self.wd.network_connection
+        # network 4
+        print "now set the network as 4"
+        #self.wd.set_network_connection(4)
+        time.sleep(1)
+        print self.wd.network_connection
+        # network 6
+        print "now set the network as 6"
+        #self.wd.set_network_connection(6)
+        time.sleep(1)
+        #print self.wd.network_connection
+        #self.wd.set_network_connection(1)
 
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"),
-                         u"No internet connection")
-        self.assertEqual(
-            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")[0:23],
-            u"Couldn't start download")
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
-                         u"TRY AGAIN")
 
 
 
