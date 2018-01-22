@@ -186,10 +186,10 @@ def delete_fotapac(device):
         device.find_element_by_android_uiautomator('new UiSelector().text("Delete")').click()
 
 def click_checkfota(device,buttontype,network):
-    device.set_network_connection(0)
+    change_network(device, 0)
     delete_fotapac(device)
     device.keyevent(4)
-    device.set_network_connection(2)
+    change_network(device, 2)
     for i in range(1, 5):  # point download button
         try:
             download_button  = device.find_element_by_id("com.tcl.ota:id/firmware_update")
@@ -198,7 +198,7 @@ def click_checkfota(device,buttontype,network):
             pass
         else:
             if button_text != u"CHECK FOR UPDATES NOW":
-                device.set_network_connection(network)
+                change_network(device, network)
                 if(buttontype == 0):        #point download button
                     return device.find_element_by_id("com.tcl.ota:id/firmware_update")
                 if(buttontype == 1):        #point download image icon
@@ -240,10 +240,43 @@ def change_network(device,network_type):
         device.set_network_connection(network_type)
     else:
         device.set_network_connection(network_type)
-        self.wd.keyevent(3)
-        self.wd.open_notifications()
+        device.keyevent(3)
+        device.open_notifications()
         time.sleep(2)
-        common.swape_bygiven(self.wd, "dragdown")
+        swape_bygiven(device, "dragdown")
+        try:
+            device.find_element_by_accessibility_id("Mobile No phone. No data. No service.")
+        except NoSuchElementException,e:
+            pass
+        else:
+            raise HavntInsertSim()
+
+        try:
+            data_icon = device.find_element_by_accessibility_id("Mobile Phone four bars.. 4G. CHN-UNICOM")
+        except NoSuchElementException, e:
+            if network_type == 4:
+                try:
+                    data_icon1 = device.find_element_by_accessibility_id("Mobile Phone four bars.. No data. CHN-UNICOM.")
+                except NoSuchElementException, e:
+                    print "Please insert UNICOM 4G SIM Card"
+                else:
+                    click_dataicon(device, data_icon1, "Off")
+        else:
+            if network_type == 4:
+                pass
+            else:
+                click_dataicon(device, data_icon, "ON")
+
+def click_dataicon(device,data_icon,state):
+    data_icon.click()
+    data_switch = device.find_element_by_id("android:id/toggle")
+    if data_switch.get_attribute("text") == state:
+        data_switch.click()
+    time.sleep(1)
+    device.keyevent(4)
+
+
+
 
 
 
@@ -261,4 +294,7 @@ class CantSearchedFotaPackage(Exception):
     def __init__(self, err='Can not searched FOTA package,please check the network and GOTU setting'):
         Exception.__init__(self, err)
 
+class HavntInsertSim(Exception):
+    def __init__(self, err="Haven't insert sim card"):
+        Exception.__init__(self, err)
 

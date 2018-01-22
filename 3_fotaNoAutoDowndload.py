@@ -50,7 +50,7 @@ class AppTest(unittest.TestCase):
                     #self.wd.find_element_by_id("com.tcl.ota:id/firmware_info").click()
                     #detail_title = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_title_shadow")
                     #self.assertEqual(detail_title, "New in this version")
-                    #detail_content = self.wd.find_element_by_id("com.tcl.ot                                                              :id/firmware_detail_content")
+                    #detail_content = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_content")
                     #self.assertEqual(detail_content, "UPDATE TO A8")
                     self.wd.keyevent(4)
                     break
@@ -99,8 +99,13 @@ class AppTest(unittest.TestCase):
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), u"TRY AGAIN")
 
         common.click_checkfota(self.wd, 0, 4)  # point download when only data nerwork
-
-
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"),
+                         u"System update available")
+        self.assertEqual(
+            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text"),
+            u'01008\x08(50.5 MB)')
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
+                         u"DOWNLOAD UPDATE")
         #common.fill_ram()     #now will not add the fill ram function
         #common.click_checkfota(self.wd, 0, 2)
 
