@@ -15,35 +15,36 @@ from appium.webdriver.common.touch_action import TouchAction
 class AppTest(unittest.TestCase):
 
     def setUp(self):
-        self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub',common.capabilities_set(2))
+        self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub',common.capabilities_set(1))
         common.read_logs(self.wd, 'logcat', ignore=True)
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
         #network 0
         #print "now set the network as 0"
-        #self.wd.set_network_connection(0)
-       # time.sleep(1)
+        #common.change_network(self.wd,0)
+        #time.sleep(1)
         #print self.wd.network_connection
         #network 1
-       # print "now set the network as 1"
-        #self.wd.set_network_connection(1)
+        #print "now set the network as 1"
+        #common.change_network(self.wd, 1)
         #time.sleep(1)
         #print self.wd.network_connection
         # network 2
-        print "now set the network as 2"
-        #self.wd.set_network_connection(2)
-        time.sleep(1)
-        print self.wd.network_connection
+        #print "now set the network as 2"
+        #common.change_network(self.wd, 2)
+        #time.sleep(1)
+        #print self.wd.network_connection
         # network 4
+        common.change_network(self.wd, 0)
         print "now set the network as 4"
-        #self.wd.set_network_connection(4)
+        common.change_network(self.wd, 4)
         time.sleep(1)
         print self.wd.network_connection
         # network 6
-        print "now set the network as 6"
-        #self.wd.set_network_connection(6)
-        time.sleep(1)
+        #print "now set the network as 6"
+        #common.change_network(self.wd, 6)
+        #time.sleep(1)
         #print self.wd.network_connection
         #self.wd.set_network_connection(1)
 

@@ -16,11 +16,11 @@ fota_fv = "8EA2ZZ20"
 fota_imei = "358511032234522"
 def capabilities_set(device_num):
     capabilities = {}
-    #if device_num == 1:
-        #capabilities['platformVersion'] = '6.0'
-    #if device_num == 2:
-    capabilities['platformVersion'] = '7.0'
-    capabilities['automationName'] = 'UIAutomator2'
+    if device_num == 1:
+        capabilities['platformVersion'] = '6.0'
+    if device_num == 2:
+        capabilities['platformVersion'] = '7.0'
+        capabilities['automationName'] = 'UIAutomator2'
 
     capabilities['unicodeKeyboard'] = 'True'
     capabilities['platformName'] = 'Android'
@@ -173,6 +173,7 @@ def enable_fota_advance(device,type):
 
 
 def delete_fotapac(device):
+    device.keyevent(3)
     device.launch_app()
     device.find_element_by_accessibility_id("More options").click()
     device.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
@@ -240,7 +241,6 @@ def change_network(device,network_type):
         device.set_network_connection(network_type)
     else:
         device.set_network_connection(network_type)
-        device.keyevent(3)
         device.open_notifications()
         time.sleep(2)
         swape_bygiven(device, "dragdown")
@@ -252,7 +252,16 @@ def change_network(device,network_type):
             raise HavntInsertSim()
 
         try:
-            data_icon = device.find_element_by_accessibility_id("Mobile Phone four bars.. 4G. CHN-UNICOM")
+            device.find_element_by_accessibility_id("Mobile No signal. No data. No SIM cards.")
+        except NoSuchElementException,e:
+            pass
+        else:
+            raise HavntInsertSim()
+        print "now try to check the 4g icon"
+
+        try:
+            data_icon = device.find_element_by_accessibility_id("Mobile Phone four bars.. 4G. CHN-UNICOM.")
+
         except NoSuchElementException, e:
             if network_type == 4:
                 try:
@@ -261,17 +270,29 @@ def change_network(device,network_type):
                     print "Please insert UNICOM 4G SIM Card"
                 else:
                     click_dataicon(device, data_icon1, "Off")
+
+
         else:
             if network_type == 4:
                 pass
             else:
-                click_dataicon(device, data_icon, "ON")
+                click_dataicon(device, data_icon, "On")
+        finally:
+            time.sleep(1)
+            device.keyevent(4)
+            time.sleep(1)
+            device.keyevent(4)
 
 def click_dataicon(device,data_icon,state):
     data_icon.click()
     data_switch = device.find_element_by_id("android:id/toggle")
-    if data_switch.get_attribute("text") == state:
+    if (data_switch.get_attribute("text") == unicode(state, "utf-8")):
+
         data_switch.click()
+    else:
+        print data_switch.get_attribute("text")
+        print state
+        print unicode(state, "utf-8")
     time.sleep(1)
     device.keyevent(4)
 
