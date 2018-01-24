@@ -32,38 +32,39 @@ class AppTest(unittest.TestCase):
         time.sleep(2)
         common.change_network(self.wd, 2)
         for i in range(1, 6):
-
-            try:
-                elm2 = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text")
-            except NoSuchElementException, e:
-                pass
-            else:
-                if elm2 != u"CHECK FOR UPDATES NOW":
-                    svn_value = self.wd.find_element_by_id("com.tcl.ota:id/firmware_system_version").get_attribute("text")
-                    self.assertEqual(svn_value, u"6.0-01007")
-                    package_size = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")
-                    print "%r" %package_size
-                    self.assertEqual(package_size, u'01008\x08(51.1 MB)')
-                    state_message = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text")
-                    print "%r" %state_message
-                    self.assertEqual(state_message, u"System update available")
-                    #self.wd.find_element_by_id("com.tcl.ota:id/firmware_info").click()
-                    #detail_title = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_title_shadow")
-                    #self.assertEqual(detail_title, "New in this version")
-                    #detail_content = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_content")
-                    #self.assertEqual(detail_content, "UPDATE TO A8")
-                    self.wd.keyevent(4)
-                    break
+            j=i
             while (True):
                 try:
-                    search_button = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
+                    elm2 = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update")
                 except NoSuchElementException, e:
                     time.sleep(5)
                 else:
-                    search_button.click()
-                    break
+                    if (elm2.get_attribute("text") != u"CHECK FOR UPDATES NOW"):
+                        svn_value = self.wd.find_element_by_id("com.tcl.ota:id/firmware_system_version").get_attribute("text")
+                        self.assertEqual(svn_value, u"6.0-01007")
+                        package_size = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")
+                        print "%r" %package_size
+                        self.assertEqual(package_size, u'01008\x08(51.1 MB)')
+                        state_message = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text")
+                        print "%r" %state_message
+                        self.assertEqual(state_message, u"System update available")
+                        #self.wd.find_element_by_id("com.tcl.ota:id/firmware_info").click()
+                        #detail_title = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_title_shadow")
+                        #self.assertEqual(detail_title, "New in this version")
+                        #detail_content = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_content")
+                        #self.assertEqual(detail_content, "UPDATE TO A8")
+                        self.wd.keyevent(4)
+                        j = j + 1
+                        break
+                    else:
+                        elm2.click()
+                        break
+            if j > i:
+                break
+
             if i >= 4:
                 raise common.CantSearchedFotaPackage()
+
 
 
         # Notification check
@@ -83,15 +84,15 @@ class AppTest(unittest.TestCase):
 
         # point "Download" in different ways
         time.sleep(2)
-        self.wd.find_element_by_accessibility_id("Download").click()
+        self.wd.find_element_by_accessibility_id("Download").click() #point download in notification bar
         self.wd.launch_app()
         time.sleep(3)
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
-        download_button = common.click_checkfota(self.wd, 0, 2)# point download button
+        download_button = common.click_checkfota(self.wd, 0, 2)  # point download button
         download_button.click()
         time.sleep(3)
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
-        download_icon = common.click_checkfota(self.wd, 1, 2) # point download image icon
+        download_icon = common.click_checkfota(self.wd, 1, 2)  # point download image icon
         download_icon.click()
         time.sleep(3)
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")

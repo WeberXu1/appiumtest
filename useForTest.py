@@ -20,33 +20,48 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
-        #network 0
-        #print "now set the network as 0"
-        #common.change_network(self.wd,0)
-        #time.sleep(1)
-        #print self.wd.network_connection
-        #network 1
-        #print "now set the network as 1"
-        #common.change_network(self.wd, 1)
-        #time.sleep(1)
-        #print self.wd.network_connection
-        # network 2
-        #print "now set the network as 2"
-        #common.change_network(self.wd, 2)
-        #time.sleep(1)
-        #print self.wd.network_connection
-        # network 4
-        common.change_network(self.wd, 0)
-        print "now set the network as 4"
-        common.change_network(self.wd, 4)
-        time.sleep(1)
-        print self.wd.network_connection
-        # network 6
-        #print "now set the network as 6"
-        #common.change_network(self.wd, 6)
-        #time.sleep(1)
-        #print self.wd.network_connection
-        #self.wd.set_network_connection(1)
+
+
+        print "now you have 20 seconds to check a package"
+
+        self.wd.open_notifications()
+
+        # point "Download" in different ways
+        time.sleep(2)
+        self.wd.find_element_by_accessibility_id("Download").click()  # point download in notification bar
+        self.wd.launch_app()
+        time.sleep(3)
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
+        download_button = common.click_checkfota(self.wd, 0, 2)  # point download button
+        download_button.click()
+        time.sleep(3)
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
+        download_icon = common.click_checkfota(self.wd, 1, 2)  # point download image icon
+        download_icon.click()
+        time.sleep(3)
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
+
+        download_button = common.click_checkfota(self.wd, 0, 0)  # point download button when no network
+        download_button.click()
+        time.sleep(3)
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"),
+                         u"No internet connection")
+        self.assertEqual(
+            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")[0:23],
+            u"Couldn't start download")
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
+                         u"TRY AGAIN")
+
+        common.click_checkfota(self.wd, 0, 4)  # point download when only data nerwork
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"),
+                         u"System update available")
+        self.assertEqual(
+            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text"),
+            u'01008\x08(51.1 MB)')
+        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
+                         u"DOWNLOAD UPDATE")
+        # common.fill_ram()     #now will not add the fill ram function
+        # common.click_checkfota(self.wd, 0, 2)
 
 
 

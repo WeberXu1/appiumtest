@@ -178,8 +178,10 @@ def delete_fotapac(device):
     device.find_element_by_accessibility_id("More options").click()
     device.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
     try:
+        print "try to find package in setting"
         delete_icon = device.find_element_by_id("com.tcl.ota:id/pref_button")
     except NoSuchElementException,e:
+        print " no package"
         pass
     else:
         delete_icon.click()
@@ -192,37 +194,38 @@ def click_checkfota(device,buttontype,network):
     device.keyevent(4)
     change_network(device, 2)
     for i in range(1, 5):  # point download button
-        try:
-            download_button  = device.find_element_by_id("com.tcl.ota:id/firmware_update")
-            button_text = download_button.get_attribute("text")
-        except NoSuchElementException, e:
-            pass
-        else:
-            if button_text != u"CHECK FOR UPDATES NOW":
-                change_network(device, network)
-                if(buttontype == 0):        #point download button
-                    return device.find_element_by_id("com.tcl.ota:id/firmware_update")
-                if(buttontype == 1):        #point download image icon
-                    return device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
-                if(buttontype == 2):        #point download in notification bar
-                    self.wd.open_notifications()
-                    try:
-                        device.find_elements_by_android_uiautomator(
-                            'new UiSelector().text("System update available")')
-                    except NoSuchElementException, e:
-                        print "there are no notification "
-                        return False
-                    else:
-                        return device.find_element_by_accessibility_id("Download")
-                break
+        j = i
         while(True):
             try:
-                search_button = device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
+                download_button  = device.find_element_by_id("com.tcl.ota:id/firmware_update")
+                button_text = download_button.get_attribute("text")
             except NoSuchElementException, e:
                 time.sleep(5)
             else:
-                search_button.click()
-                break
+                if button_text != u"CHECK FOR UPDATES NOW":
+                    change_network(device, network)
+                    j = j + 1
+                    if(buttontype == 0):        #point download button
+                        return device.find_element_by_id("com.tcl.ota:id/firmware_update")
+                    if(buttontype == 1):        #point download image icon
+                        return device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
+                    if(buttontype == 2):        #point download in notification bar
+                        self.wd.open_notifications()
+                        try:
+                            device.find_elements_by_android_uiautomator(
+                                'new UiSelector().text("System update available")')
+                        except NoSuchElementException, e:
+                            print "there are no notification "
+                            return False
+                        else:
+                            return device.find_element_by_accessibility_id("Download")
+                    break
+                else:
+                    download_button.click()#point search button
+                    break
+
+        if j > i:
+            break
         if i >= 4:
             raise CantSearchedFotaPackage
 
@@ -295,7 +298,6 @@ def click_dataicon(device,data_icon,state):
         print unicode(state, "utf-8")
     time.sleep(1)
     device.keyevent(4)
-
 
 
 
