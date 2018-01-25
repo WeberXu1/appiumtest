@@ -23,48 +23,19 @@ class AppTest(unittest.TestCase):
 
 
         print "now you have 20 seconds to check a package"
-
+        time.sleep(20)
         self.wd.open_notifications()
-
-        # point "Download" in different ways
         time.sleep(2)
-        self.wd.find_element_by_accessibility_id("Download").click()  # point download in notification bar
-        self.wd.launch_app()
-        time.sleep(3)
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
-        download_button = common.click_checkfota(self.wd, 0, 2)  # point download button
-        download_button.click()
-        time.sleep(3)
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
-        download_icon = common.click_checkfota(self.wd, 1, 2)  # point download image icon
-        download_icon.click()
-        time.sleep(3)
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"), "PAUSE")
-
-        download_button = common.click_checkfota(self.wd, 0, 0)  # point download button when no network
-        download_button.click()
-        time.sleep(3)
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"),
-                         u"No internet connection")
-        self.assertEqual(
-            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")[0:23],
-            u"Couldn't start download")
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
-                         u"TRY AGAIN")
-
-        common.click_checkfota(self.wd, 0, 4)  # point download when only data nerwork
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text"),
-                         u"System update available")
-        self.assertEqual(
-            self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text"),
-            u'01008\x08(51.1 MB)')
-        self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
-                         u"DOWNLOAD UPDATE")
-        # common.fill_ram()     #now will not add the fill ram function
-        # common.click_checkfota(self.wd, 0, 2)
-
-
-
+        #self.wd.find_element_by_android_uiautomator(
+        #    'new UiSelector().text("Downloading system update").getparent().getFromParent(new UiSelector().resourceId("android:id/line3")).getChild(new UiSelector().resourceId("android:id/text"))')
+        p = self.wd.find_element_by_xpath('/hierarchy/android.widget.FrameLayout/'
+            'android.widget.FrameLayout[1]/android.widget.FrameLayout/android.widget.FrameLayout/'
+            'android.view.ViewGroup/android.widget.FrameLayout[1]/android.widget.FrameLayout/'
+            'android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[2]/'
+            'android.widget.TextView')
+        print "%r" %p
+        print p.get_attribute("text")
+        print p.get_attribute("text").split("%")[0]
 
 
 
