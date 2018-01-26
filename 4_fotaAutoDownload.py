@@ -46,11 +46,32 @@ class AppTest(unittest.TestCase):
         download_statetext = download_state.get_attribute("text")
         download_statetext1 = download_statetext.split(',')
         self.assertEqual(download_statetext1[0],"Waiting for Wi-Fi")
-        downloadsize = download_statetext1[1].split(" ")
-        download_percent = float(downloadsize[2]) / 51.1
 
+        common.change_network(self.wd, 6)
+        time.sleep(10)
+        self.check_fotastate(self.wd, "PAUSE")
+        download_state = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra")
+        downloadsize = download_state.get_attribute("text").split('/')
+        download_percent = float(downloadsize[0]) * 100 / 51.1
         self.wd.open_notifications()
-        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Downloading system update").fromParent(new UiSelector().resourceId("android:id/line3")).childSelector(new UiSelector().resourceId("android:id/text"))')
+        # self.wd.find_element_by_android_uiautomator('new UiSelector().text("Downloading system update").fromParent(new UiSelector().resourceId("android:id/line3")).childSelector(new UiSelector().resourceId("android:id/text"))')
+        noti_downloadp = self.wd.find_element_by_xpath('/hierarchy/android.widget.FrameLayout/'
+                                                       'android.widget.FrameLayout[1]/android.widget.FrameLayout/android.widget.FrameLayout/'
+                                                       'android.view.ViewGroup/android.widget.FrameLayout[1]/android.widget.FrameLayout/'
+                                                       'android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[2]/'
+                                                       'android.widget.TextView')
+        noti_downloadpc = noti_downloadp.get_attribute("text").split("%")[0]
+        if abs(float(noti_downloadpc) - download_percent) > 10:
+            print "download percent sync failed "
+        self.wd.keyevent(4)
+
+        
+
+
+
+
+
+
 
 
 
