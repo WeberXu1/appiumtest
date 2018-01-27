@@ -20,6 +20,7 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_fotaautodownload(self):
+        self.wd.reset()
         download_button = common.click_checkfota(self.wd, 0, 2)
         download_button.click()  #fota interface point "download" button
         self.check_fotastate(self.wd,"PAUSE")
@@ -65,7 +66,70 @@ class AppTest(unittest.TestCase):
             print "download percent sync failed "
         self.wd.keyevent(4)
 
-        
+        while(True):
+            time.sleep(5)
+            try:
+                fota_state = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update")
+            except NoSuchElementException,e:
+                print "download error,maybe updates Fc"
+            else:
+                fota_state_att = fota_state.get_attribute("text")
+                if fota_state_att == "Installing":      #download successfully
+                    break
+                if fota_state_att == "RESUME":      #Network disconnected
+                    if (self.wd.network_connection() != 2):
+                        print "download error"
+                    else:
+                        common.change_network(self.wd, 6)
+                        fota_state.click()
+                else:
+                    print "download failed"
+                    break
+
+
+
+        common.swape_bygiven(self.wd, "dragdown")  #enter setting and change the system time.
+        self.wd.find_element_by_accessibility_id("Settings").click()
+        common.swape_findelm(self.wd, "allappdown", 'new UiSelector().text("Date & time")',
+                                 MobileBy.ANDROID_UIAUTOMATOR).click()
+
+        hourtype = self.wd.find_elements_by_class_name("android.widget.Switch")
+        if (hourtype[1].get_attribute("text") == "Off"):
+            hourtype[1].click()
+        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Automatic date & time")').click()
+        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Off")').click()
+        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Set time")').click()
+        now_hour = self.wd.find_element_by_id("android:id/hours")
+        #now_minute = self.wd.find_element_by_id("android:id/minutes")
+
+        if (int(now_hour)+1 > 23):
+            self.wd.keyevent(4)
+            self.wd.find_element_by_android_uiautomator('new UiSelector().text("Set data")').click()
+            now_day = self.wd.find_element_by_id("android:id/date_picker_header_date").get_attribute("text").split(" ")[1]
+            try:
+                next_day = 'new UiSelector().text("' + (now_day + 1) + '")'
+                next_day_elm = self.wd.find_element_by_android_uiautomator(next_day)
+            except NoSuchElementException,e:
+                common.swape_bygiven(self.wd, "left2right")
+                self.wd.find_element_by_android_uiautomator('new UiSelector().text("1")').click()
+            else:
+                next_day_elm.click()
+                self.wd.find_element_by_id("android:id/button1")
+
+        else:
+            self.wd.find_element_by_accessibility_id("15").click()
+            self.wd.find_element_by_id("android:id/button1")
+
+
+
+
+
+
+
+
+
+
+
 
 
 
