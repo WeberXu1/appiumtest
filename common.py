@@ -302,14 +302,53 @@ def click_dataicon(device,data_icon,state):
     device.keyevent(4)
 
 
+def change_time_forfota(device):
+    device.open_notifications()
+    time.sleep(2)
+    swape_bygiven(device, "dragdown")  # enter setting and change the system time.
+    time.sleep(2)
+    print "now drag down the noti"
+    device.find_element_by_accessibility_id("Settings").click()
+    swape_findelm(device, "allappdown", 'new UiSelector().text("Date & time")',
+                         MobileBy.ANDROID_UIAUTOMATOR).click()
 
+    hourtype = device.find_elements_by_class_name("android.widget.Switch")
+    if (hourtype[1].get_attribute("text") == "Off"):
+        hourtype[1].click()
+    device.find_element_by_android_uiautomator('new UiSelector().text("Automatic date & time")').click()
+    device.find_element_by_android_uiautomator('new UiSelector().text("Off")').click()
+    device.find_element_by_android_uiautomator('new UiSelector().text("Set time")').click()
+    now_hour = device.find_element_by_id("android:id/hours")
+    now_hour_in = int(now_hour.get_attribute("text"))
+    # now_minute = self.wd.find_element_by_id("android:id/minutes")
 
+    if (now_hour_in + 1 > 23):
+        device.keyevent(4)
+        device.find_element_by_android_uiautomator('new UiSelector().text("Set date")').click()
+        now_day = device.find_element_by_id("android:id/date_picker_header_date").get_attribute("text").split(" ")[
+            2]
+        try:
+            next_dat_in = int(now_day) + 1
+            next_day = 'new UiSelector().text("' + str(next_dat_in) + '")'
+            next_day_elm = device.find_element_by_android_uiautomator(next_day)
+        except NoSuchElementException, e:
+            device.swape_bygiven(device, "right2left")
+            device.find_element_by_android_uiautomator('new UiSelector().text("1")').click()
+        else:
+            next_day_elm.click()
+        finally:
+            device.find_element_by_id("android:id/button1").click()
 
+    else:
+        now_hour_in = now_hour_in + 1
+        device.find_element_by_accessibility_id(str(now_hour_in)).click()
+        device.find_element_by_id("android:id/button1").click()
 
-
-
-
-
+def get_bettery(device):
+    device.open_notifications()
+    bettery_icon = device.find_element_by_id("com.android.systemui:id/battery")
+    bettery_value = int(bettery_icon.get_attribute("name").split(" ")[1])
+    return bettery_value
 
 class CantFindAppException(Exception):
     def __init__(self, err='Can not open update or update is not in app list'):

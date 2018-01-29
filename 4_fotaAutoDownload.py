@@ -67,94 +67,99 @@ class AppTest(unittest.TestCase):
         self.wd.keyevent(4)
 
         while(True):
-            time.sleep(5)
+            i = 1
             try:
-                fota_state = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update")
+                fota_state = self.wd.find_element_by_id("selfcom.tcl.ota:id / firmware_install")
             except NoSuchElementException,e:
-                print "download error,maybe updates Fc"
-            else:
-                fota_state_att = fota_state.get_attribute("text")
-                if fota_state_att == "Installing":      #download successfully
-                    break
-                if fota_state_att == "RESUME":      #Network disconnected
-                    if (self.wd.network_connection() != 2):
-                        print "download error"
+                try:
+                    download_depend = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message")
+                except NoSuchElementException,e:
+                    common.change_network(6)
+                    try:
+                        retry_button = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update")
+                    except NoSuchElementException,e:
+                        print "Download failed and somthing wrong happend"
+                        break
+
                     else:
-                        common.change_network(self.wd, 6)
-                        fota_state.click()
+                        if retry_button.get_attribute("text") == "TRY AGAIN":
+                            retry_button.click()
+                            i = i + 1
+                        else:
+                            print "Download failed and not network problem"
+                            break
+
+
                 else:
-                    print "download failed"
+                    if download_depend.get_attribute("text") == "Downloading system update":
+                        time.sleep(10)
+
+            else:
+                bettery_value1 = common.get_bettery(self.wd)
+                if bettery_value1 < 30:
+                    self.assertEqual(fota_state.get_attribute("clickable"),False)
+                    bettery_info = self.wd.find_element_by_id("com.tcl.ota:id/firmware_battery_info")
+                    self.assertEqual(bettery_info.get_attribute("text"),"	Battery needs > 30% charge to start installation")
+                    break
+                else:
                     break
 
 
 
-        common.swape_bygiven(self.wd, "dragdown")  #enter setting and change the system time.
-        self.wd.find_element_by_accessibility_id("Settings").click()
-        common.swape_findelm(self.wd, "allappdown", 'new UiSelector().text("Date & time")',
-                                 MobileBy.ANDROID_UIAUTOMATOR).click()
 
-        hourtype = self.wd.find_elements_by_class_name("android.widget.Switch")
-        if (hourtype[1].get_attribute("text") == "Off"):
-            hourtype[1].click()
-        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Automatic date & time")').click()
-        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Off")').click()
-        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Set time")').click()
-        now_hour = self.wd.find_element_by_id("android:id/hours")
-        #now_minute = self.wd.find_element_by_id("android:id/minutes")
 
-        if (int(now_hour)+1 > 23):
-            self.wd.keyevent(4)
-            self.wd.find_element_by_android_uiautomator('new UiSelector().text("Set data")').click()
-            now_day = self.wd.find_element_by_id("android:id/date_picker_header_date").get_attribute("text").split(" ")[1]
-            try:
-                next_day = 'new UiSelector().text("' + (now_day + 1) + '")'
-                next_day_elm = self.wd.find_element_by_android_uiautomator(next_day)
-            except NoSuchElementException,e:
-                common.swape_bygiven(self.wd, "left2right")
-                self.wd.find_element_by_android_uiautomator('new UiSelector().text("1")').click()
-            else:
-                next_day_elm.click()
-                self.wd.find_element_by_id("android:id/button1")
-
+        self.wd.keyevent(3)
+        self.wd.open_notifications()
+        try:
+            later_button = self.wd.find_element_by_accessibility_id("LATER")
+        except NoSuchElementException,e:
+            print "Installing notification pop up failed"
         else:
-            self.wd.find_element_by_accessibility_id("15").click()
-            self.wd.find_element_by_id("android:id/button1")
+            later_button.click()
+            time.sleep(1)
+            self.wd.find_element_by_android_uiautomator('new UiSelector().text("1 hour")').click()
+            self.wd.find_element_by_android_uiautomator('new UiSelector().text("OK")').click()
 
+        self.wd.open_notifications()
+        try:
+            self.wd.find_element_by_accessibility_id("LATER")
+        except NoSuchElementException,e:
+            pass
+        else:
+            bettery_icon = self.wd.find_element_by_id("com.android.systemui:id/battery")
+            bettery_value = int(bettery_icon.get_attribute("name").split(" ")[1])
+            if bettery_value != 100:
+                print "Installing notification did not disappeared after point later"
 
+        common.change_time_forfota(self.wd)
 
+        time.sleep(2)
+        try:
+            install_button = self.wd.find_element_by_accessibility_id("Install")
+        except NoSuchElementException,e:
+            print "Installing notification pop up failed"
+        else:
+            install_button.click()
+            time.sleep(1)
 
+        install_tital = self.wd.find_element_by_id("com.tcl.ota:id/alertTitle").get_attribute("text")
+        self.assertEqual(install_tital,"Install system update?")
+        install_message = self.wd.find_element_by_id("android:id/message")
+        self.assertEqual(install_message,"	This improves your device's security, performance and software. It will keep your personal data safe.")
 
+        later_button = self.wd.find_element_by_id("android:id/button2")
+        self.assertEqual(later_button.get_attribute("text"),"Later")
+        later_button.click()
+        try:
+            install_button = self.wd.find_element_by_id("selfcom.tcl.ota:id / firmware_install")
+        except NoSuchElementException,e:
+            print "click later button in installing interface failed"
+        else:
+            install_button.click()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        install_button = self.wd.find_element_by_id("android:id/button1")
+        self.assertEqual(install_button.get_attribute("text"),"Install")
+        install_button.click()
 
     def tearDown(self):
 
