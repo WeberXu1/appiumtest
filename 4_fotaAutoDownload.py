@@ -20,26 +20,46 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_fotaautodownload(self):
+
         self.wd.reset()
-        download_button = common.click_checkfota(self.wd, 0, 2)
-        download_button.click()  #fota interface point "download" button
-        self.check_fotastate(self.wd,"PAUSE")
-        self.click_state_button(self.wd, "PAUSE",0)
+        # common.enable_fota_advance(self.wd, "FOTA")
+        self.wd.find_element_by_accessibility_id("More options").click()
+        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
+        elm1 = self.wd.find_elements_by_class_name("android.widget.Switch")
+        str1 = elm1[0].get_attribute("text")
+        if str1 == u'Off':      # 确保打开FOTA autodownload
+            elm1[0].click()
+            print "enable FOTA Auto-Download succsessfully"
 
-        time.sleep(2)
-        self.check_fotastate(self.wd, "RESUME")
-        self.click_state_button(self.wd, "RESUME",0)
 
-        time.sleep(2)
-        self.check_fotastate(self.wd, "PAUSE")
-        self.click_state_button(self.wd, "PAUSE", 1)
+        download_button = common.click_checkfota(self.wd, 0, 2) #删除已存在的差分包并开始check后自动下载
+        if download_button.get_attribute("text") == u"CHECK FOR UPDATES NOW":
+            download_button.click() # if downloading does not begin ,fota interface point "download" button
+            print "Downloading did not begined,click the download button maully"
 
-        time.sleep(2)
-        self.check_fotastate(self.wd, "RESUME")
-        self.click_state_button(self.wd, "RESUME", 1)
+        self.check_fotastate(self.wd, u"PAUSE")
+        print "Auto download begined"
 
+        self.click_state_button(self.wd, "PAUSE", 0) #在fota interface 点击PAUSE
         time.sleep(2)
-        self.check_fotastate(self.wd, "PAUSE")
+        self.check_fotastate(self.wd, u"RESUME")
+        print "PAUSE the downloading in update interface seccessfully"
+
+        self.click_state_button(self.wd, "RESUME", 0) #在fota interface 点击RESUME
+        time.sleep(2)
+        self.check_fotastate(self.wd, u"PAUSE")
+        print "RESUME the downloading in update interface seccessfully"
+
+        self.click_state_button(self.wd, "PAUSE", 1) #在notification bar 点击 PAUSE
+        time.sleep(2)
+        self.check_fotastate(self.wd, u"RESUME")
+        print "PAUSE the downloading in notification bar seccessfully"
+
+
+        self.click_state_button(self.wd, "RESUME", 1)#在notification bar 点击 RESUME
+        time.sleep(2)
+        self.check_fotastate(self.wd, u"PAUSE")
+        print "RESUME the downloading in notification bar seccessfully"
 
         common.change_network(self.wd,4)
         self.check_fotastate(self.wd, "RESUME")
@@ -67,7 +87,6 @@ class AppTest(unittest.TestCase):
         self.wd.keyevent(4)
 
         while(True):
-            i = 1
             try:
                 fota_state = self.wd.find_element_by_id("selfcom.tcl.ota:id / firmware_install")
             except NoSuchElementException,e:
@@ -82,9 +101,8 @@ class AppTest(unittest.TestCase):
                         break
 
                     else:
-                        if retry_button.get_attribute("text") == "TRY AGAIN":
+                        if (retry_button.get_attribute("text") == "TRY AGAIN") or (retry_button.get_attribute("text") == "RESUME" ):
                             retry_button.click()
-                            i = i + 1
                         else:
                             print "Download failed and not network problem"
                             break
@@ -165,35 +183,47 @@ class AppTest(unittest.TestCase):
 
         self.wd.quit()
 
-    def check_fotastate(self,device, state):
-        state_button = device.find_element_by_id("com.tcl.ota:id/firmware_update")
-        self.assertEqual(state_button.get_attribute("text"), state)
-
-        device.open_notifications()
-        try:
-            noti_button = device.find_element_by_id("android:id/action0")
-        except NoSuchElementException, e:
-            print "downloading page missing" + state
-        else:
-            self.assertEqual(noti_button.get_attribute("text"), "PAUSE")
-        finally:
-            device.keyevent(4)
-
-    def click_state_button(self,device,state,type):
-        if type == 0:
+    def click_state_button(self,device,state,type):  # 在type页面点击state按钮
+        if type == 0:   # 在update主界面点击state键
             state_button = device.find_element_by_id("com.tcl.ota:id/firmware_update")
 
-        else:
+        else:       #在notification bar上点击state键
             device.open_notifications()
-            time.sleep(1)
-            state_button = device.find_element_by_id("android:id/action0")
+            '''
+            updates_int = "PAUSE" 
+            updates_noti = "Pause"
+            updates_int = "RESUME"
+            updates_noti = "RESUME"
+            
+            '''
+            if (state == "PAUSE"):
+                state = state.capitalize()
+            time.sleep(2)
+            state_button = device.find_element_by_accessibility_id(state)
 
-        if state_button.get_attribute("text") == state:  # point Pause button in fota interface
+        if state_button.get_attribute("text") == state:  # point Pause button in fota interface/notificationbar
             state_button.click()
         else:
             print " point button failed" + state
 
         if type == 1:
+            device.keyevent(4)
+
+    def check_fotastate(self,device, state):
+        state_button = device.find_element_by_id("com.tcl.ota:id/firmware_update")
+        self.assertEqual(state_button.get_attribute("text"), state) #比较update interface中状态值与state
+
+        device.open_notifications()         #比较update notification bar中状态值与state
+        time.sleep(2)
+        try:
+            noti_button = device.find_element_by_id("android:id/action0")
+        except NoSuchElementException, e:
+            print "downloading page missing" + state
+        else:
+            if(state == u"PAUSE"):
+                state = state.capitalize()
+            self.assertEqual(noti_button.get_attribute("text"), state)
+        finally:
             device.keyevent(4)
 
 if __name__ == '__main__':

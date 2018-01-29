@@ -190,7 +190,7 @@ def delete_fotapac(device):
         time.sleep(2)
         device.find_element_by_android_uiautomator('new UiSelector().text("Delete")').click()
 
-def click_checkfota(device,buttontype,network):
+def click_checkfota(device,buttontype,network):   #关闭Wi-Fi-删除以下载差分包-打开Wi-Fi-检查状态按钮
     change_network(device, 0)
     delete_fotapac(device)
     device.keyevent(4)
@@ -204,15 +204,22 @@ def click_checkfota(device,buttontype,network):
             except NoSuchElementException, e:
                 time.sleep(5)
             else:
-                if button_text != u"CHECK FOR UPDATES NOW":
-                    change_network(device, network)
+                if button_text == u"CHECK FOR UPDATES NOW":    #状态是未check差分包时点击搜索按钮
+                    download_button.click()  # point search button
+                    break
+                elif button_text == u"PAUSE":           #状态已经在下载时说明设置是自动下载直接pass
+                    j = j + 1
+                    break
+                else:
+                    if network != 2:                    #状态是已check到差分包未下载时，选择网络模式后点击下载
+                        change_network(device, network)
                     j = j + 1
                     if(buttontype == 0):        #point download button
                         return device.find_element_by_id("com.tcl.ota:id/firmware_update")
                     if(buttontype == 1):        #point download image icon
                         return device.find_element_by_id("com.tcl.ota:id/firmware_state_bottomright")
                     if(buttontype == 2):        #point download in notification bar
-                        self.wd.open_notifications()
+                        device.open_notifications()
                         try:
                             device.find_elements_by_android_uiautomator(
                                 'new UiSelector().text("System update available")')
@@ -222,9 +229,8 @@ def click_checkfota(device,buttontype,network):
                         else:
                             return device.find_element_by_accessibility_id("Download")
                     break
-                else:
-                    download_button.click()#point search button
-                    break
+
+
 
         if j > i:
             break
