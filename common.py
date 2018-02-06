@@ -209,11 +209,13 @@ def click_checkfota(device,buttontype,network):   #关闭Wi-Fi-删除以下载�
                     break
                 elif button_text == u"PAUSE":           #状态已经在下载时说明设置是自动下载直接pass
                     j = j + 1
+                    return device.find_element_by_id("com.tcl.ota:id/firmware_update")
                     break
                 else:
                     if network != 2:                    #状态是已check到差分包未下载时，选择网络模式后点击下载
                         change_network(device, network)
                     j = j + 1
+                    time.sleep(5)
                     if(buttontype == 0):        #point download button
                         return device.find_element_by_id("com.tcl.ota:id/firmware_update")
                     if(buttontype == 1):        #point download image icon
@@ -352,8 +354,13 @@ def change_time_forfota(device):
 
 def get_bettery(device):
     device.open_notifications()
+    time.sleep(2)
+    swape_bygiven(device, "dragdown")
+    time.sleep(2)
     bettery_icon = device.find_element_by_id("com.android.systemui:id/battery")
     bettery_value = int(bettery_icon.get_attribute("name").split(" ")[1])
+    device.keyevent(4)
+    device.keyevent(4)
     return bettery_value
 
 class CantFindAppException(Exception):

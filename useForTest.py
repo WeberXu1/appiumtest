@@ -3,8 +3,10 @@ import unittest
 #import selenium.common.exceptions
 from appium import webdriver
 from selenium.common.exceptions import  NoSuchElementException
+from selenium.common.exceptions import WebDriverException
 import time
 import common
+import os
 import subprocess
 #from selenium.webdriver.support.wait import WebDriverWait
 #from selenium.webdriver.support import expected_conditions
@@ -20,47 +22,52 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
-        self.wd.reset()
-        # need to clear the app's data.ok
-        # common.enable_fota_advance(self.wd, "FOTA")
-        self.wd.find_element_by_accessibility_id("More options").click()
-        self.wd.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
-        elm1 = self.wd.find_elements_by_class_name("android.widget.Switch")
-        str1 = elm1[0].get_attribute("text")
-        print "%r" % str1
-        if str1 == u'Off':
-            elm1[0].click()
-        download_button = common.click_checkfota(self.wd, 0, 2)
-        if download_button.get_attribute("text") == u"CHECK FOR UPDATES NOW":
-            download_button.click()  # fota interface point "download" button
-        self.check_fotastate(self.wd, u"PAUSE")
-        self.click_state_button(self.wd, "PAUSE", 0)
+        cmd = "adb logcat > C:\\Users\\77465\\Desktop\\1122.txt"
+        cmd1 = "adb reboot"
+        os.popen(cmd1)
+        while True:
+            time.sleep(10)
+            try:
+                self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub', common.capabilities_set(1))
+            except WebDriverException,e:
+                pass
+            else:
+                print "reconnnect to appium secc"
+                break
 
-        time.sleep(2)
-        self.check_fotastate(self.wd, u"RESUME")
-        self.click_state_button(self.wd, "RESUME", 0)
+        self.wd.open_notifications()
+
 
     def tearDown(self):
         self.wd.quit()
 
-    def click_state_button(self,device,state,type):
-        if type == 0:
+    def click_state_button(self, device, state, type):  # 在type页面点击state按钮
+        if type == 0:  # 在update主界面点击state键
             state_button = device.find_element_by_id("com.tcl.ota:id/firmware_update")
-
-        else:
+            print "state 0"
+        else:  # 在notification bar上点击state键
             device.open_notifications()
-            time.sleep(1)
-            state_button = device.find_element_by_id("android:id/action0")
+            print "state 1"
+            '''
+            updates_int = "PAUSE" 
+            updates_noti = "Pause"
+            updates_int = "RESUME"
+            updates_noti = "RESUME"
 
-        if state_button.get_attribute("text") == state:  # point Pause button in fota interface
+            '''
+            if (state == "PAUSE"):
+                state = state.capitalize()
+            time.sleep(2)
+            print ""
+            state_button = device.find_element_by_accessibility_id(state)
+
+        if state_button.get_attribute("text") == state:  # point Pause button in fota interface/notificationbar
             state_button.click()
         else:
             print " point button failed" + state
 
-        if type == 1:
-            device.keyevent(4)
-
     def check_fotastate(self,device, state):
+        device.launch_app()
         state_button = device.find_element_by_id("com.tcl.ota:id/firmware_update")
         self.assertEqual(state_button.get_attribute("text"), state)
 
