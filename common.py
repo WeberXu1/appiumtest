@@ -60,6 +60,8 @@ def swape_bygiven(device,distance):
         device.swipe(x / 2, y / 4, x / 2, y * 3 / 4, 1000)
     if distance == "right2left":
         device.swipe(x * 5 / 6, y / 2, x / 6, y / 2, 1000)
+    if distance == "aotacheck":
+        device.swipe(x / 2, y / 4, x / 2, y * 3 / 4, 1000)
 
 def swape_app2homescreen(device,appname):
     try:

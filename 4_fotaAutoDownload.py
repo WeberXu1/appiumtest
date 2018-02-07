@@ -5,6 +5,7 @@ from appium import webdriver
 from selenium.common.exceptions import  NoSuchElementException
 import time
 import common
+import os
 import subprocess
 #from selenium.webdriver.support.wait import WebDriverWait
 #from selenium.webdriver.support import expected_conditions
@@ -60,6 +61,7 @@ class AppTest(unittest.TestCase):
         time.sleep(2)
         self.check_fotastate(self.wd, u"PAUSE")
         print "RESUME the downloading in notification bar seccessfully"
+        s1_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/fotaautodownload_1.log')
 
         common.change_network(self.wd,4)    #断开Wi-Fi后查看FOTA界面状态
         self.check_fotastate(self.wd, "RESUME")
@@ -73,6 +75,7 @@ class AppTest(unittest.TestCase):
         time.sleep(10)
         self.check_fotastate(self.wd, "PAUSE")
         print "FOTA redownload seccussfully"
+        s2_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/fotaautodownload_2.log')
 
         #截取FOTA界面的下载百分比和notification中的下载百分比对比
         download_state = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra")
@@ -91,6 +94,7 @@ class AppTest(unittest.TestCase):
             print "download percent sync failed "
         self.wd.keyevent(4)
         print "download percent sync normally"
+        s3_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/fotaautodownload_3.log')
 
         while (True):  # 持续监控差分包是否下载完成
 
@@ -138,6 +142,8 @@ class AppTest(unittest.TestCase):
                 else:
                     break
 
+        s4_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/fotaautodownload_4.log')
+
         time.sleep(10)
         self.wd.keyevent(3)
         self.wd.open_notifications()
@@ -176,6 +182,8 @@ class AppTest(unittest.TestCase):
             install_button.click()  # 点击install按钮
             time.sleep(1)
 
+        s5_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/fotaautodownload_5.log')
+
         print "Clicked the install button in notification "
         install_tital = self.wd.find_element_by_id("com.tcl.ota:id/alertTitle").get_attribute("text")
         self.assertEqual(install_tital, "Install system update?")
@@ -194,9 +202,25 @@ class AppTest(unittest.TestCase):
             install_button.click()
             print "Clicked the install button in FOTA interface "
         install_button = self.wd.find_element_by_id("android:id/button1")
+        s6_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/fotaautodownload_6.log')
         self.assertEqual(install_button.get_attribute("text"), "Install")
-        # install_button.click()
+        install_button.click()
         print "now installing"
+        time.sleep(30)
+        while True:     #等待系统安装重启
+            time.sleep(10)
+            try:
+                self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub', common.capabilities_set(1))
+            except WebDriverException,e:
+                pass
+            else:
+                print "reconnnect to appium secc"
+                break
+
+        self.wd.open_notifications()
+        s7_logs = common.write_logs(common.read_logs(self.wd, 'logcat'), 'D:/test/logs/fotaautodownload_7.log')
+
+        common.write_logs(s1_logs + s2_logs + s3_logs + s4_logs + s5_logs + s6_logs + s7_logs, 'D:/test/logs/fotaautodownload_total.log')
 
     def tearDown(self):
 
