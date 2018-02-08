@@ -55,17 +55,52 @@ class AppTest(unittest.TestCase):
 
         common.change_network(self.wd, 2)       #手动点击checkaota数据
         self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
-        for i in range(1,10):
+        for i in range(1, 10):
             common.swape_bygiven(self.wd, "aotacheck")
             try:
                 self.wd.find_element_by_id("com.tcl.ota:id/update_available")
-            except NoSuchElementException,e:
+            except NoSuchElementException, e:
                 time.sleep(5)
             else:
                 print "Check for app update successfully"
                 break
             if i > 8:
                 print "ERROR:check for app list failed"
+        applist = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/name")')
+        applist_t = []      #创建applist界面的app列表
+
+        for appelm1 in applist:
+            appname = appelm1.get_attribute("text")
+            applist_t.append({"name": appname, "size": "", "description": "", "content": "", "state": ""})
+        app_button = self.wd.find_elements_by_class_name("android.widget.Button")
+        i = 0
+        for app_button_elm in app_button:
+            buttonname = app_button_elm.get_attribute("text")
+            if (buttonname == "UPDATE" or buttonname == "INSTALL" or buttonname == "PAUSE" or buttonname == "RESUME"):
+                if len(applist_t) > i:
+                    print "state num more than appname's num, check the applist"
+                applist_t[i]["state"] = buttonname
+                i = i + 1
+
+        app_content = self.wd.find_elements_by_android_uiautomator(
+            'new UiSelector().resourceId("com.tcl.ota:id/app_content")')
+        i = 0
+        for app_content_elm in app_content:
+            contenttext = app_content_elm.get_attribute("text")
+            applist_t[i]["content"] = contenttext
+            i = i + 1
+
+        app_size = self.wd.find_elements_by_android_uiautomator(
+            'new UiSelector().resourceId("com.tcl.ota:id/status")')
+        i = 0
+        for app_size_elm in app_size:
+            size_num = app_size_elm.get_attribute("text")
+            applist_t[i]["size"] = size_num
+            i = i + 1
+
+        for appifo in applist_t:
+            print appifo
+
 
 
 
