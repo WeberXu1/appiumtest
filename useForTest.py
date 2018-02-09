@@ -21,11 +21,26 @@ class AppTest(unittest.TestCase):
         self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub',common.capabilities_set(2))
         common.read_logs(self.wd, 'logcat', ignore=True)
         print "begin logtime" + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        self.aota_update_app = []
+        aota_new_app = []
+        aota_app1 = {"name": u"Apps", "size": u"10.0 MB", "description": u"""
+                Apps is an application store of alcatel smartphone, which offers a variety of applications for free downloading. Discover and download apps or games for your phone or tablet through Apps. Enjoy millions of the latest Android apps and games. Anytime, anywhere, with your device. This new version can also help you clean up your phone, make it faster, and protect your cell phone from viruses. So, what are you waiting for? Update it now!
+                """, "content": u"""
+                · Phone Booster A quick booster to free up RAM, clean background tasks, provide extra entrances in widgets, desktop shortcuts and notification toolbar. · Junk Files Cleaner Help analyze and safely remove junk files which take up your memory and storage space. · Antivirus - Virus Cleaner Protect your mobile from virus attack and keep your privacy safe. · Battery Saver Instantly find and fix battery power consumption problems and quickly scan your mobile, save the power consumption of apps and settings. · CPU Cooler Analyze CPU usage and stop overheating apps to cool down CPU temperature, with only 1-tap. · APP Uninstall Help you find rarely used apps, and uninstall unnecessary apps to save more space.
+                ""","state":u"UPDATE"}
+        aota_app2 = {"name": u"Files", "size": u"5.9 MB", "description": u"0525", "content": u"0525","state":u"UPDATE"}
+        aota_app3 = {"name": u"Weather", "size": u"22.5 MB", "description": u"wqwewqqwe", "content": u"weqqewqwe","state":u"UPDATE"}
+        aota_app4 = {"name": u"Turbo Browser", "size": u"10.5 MB", "description": u"Turbo Browser, the top ultra-fast and lightweight browser for Android mobile, provides incognito browsing and fast web opening for all the users. It enables fast downloading of video, image, doc, PDF & files; secure & fluent browsing with ad blocker and antivirus. Night mode is included to give you the comfortable browsing experience.", "content": u"Features:\n\u2714Private Search\n\u2714Adblocker Provided\n\u2714Fast Open and Download\n\u2714Multiple Search Engines\n\u2714Data Saving\n\u2714News Feed\n\u2714Night Mode\n\u2714Switch Text Font\n\nTry the super fast browser for Android right now!\n\nContact Us:\nFor any issue or suggestion, please send us feedbacks via: \nTwitter: https://twitter.com/TurboBrowser_\nFacebook: https://www.facebook.com/TheTurboBrowser/\nG+: https://plus.google.com/u/1/communities/116473561383982061062","state":u"INSTALL"}
+        aota_app5 = {"name": u"掌阅iReader", "size": u"16.0 MB", "description": u"掌阅iReader", "content": u"掌阅iReader","state":u"INSTALL"}
+        #aota_update_app.append(aota_app1)
+        self.aota_update_app.append(aota_app2)
+        self.aota_update_app.append(aota_app3)
+        self.aota_update_app.append(aota_app4)
+        #aota_new_app.append(aota_app5)
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
         self.wd.reset()
-        self.wd.launch_app()
         self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
         for i in range(1, 10):
             common.swape_bygiven(self.wd, "aotacheck")
@@ -77,7 +92,7 @@ class AppTest(unittest.TestCase):
         for appelm1 in applist:
             appelm1.click()
             common.swape_bygiven(self.wd,"allappdown")
-            time.sleep(1)
+            time.sleep(2)
             appdet_state = self.wd.find_element_by_class_name("android.widget.Button").get_attribute("text")
             appdet_name = self.wd.find_element_by_id("com.tcl.ota:id/name").get_attribute("text")
             if (appdet_state == "INSTALL" or appdet_state == "UPDATE"):
@@ -104,8 +119,54 @@ class AppTest(unittest.TestCase):
             self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_app_bar_close").click()
 
         print "NOW APPDETAIL"
+        i = 0
         for appifo1 in app_detail_list:
             print appifo1
+        for appifo2 in app_detail_list:
+            self.assertEqual(appifo2["name"],applist_t[i]["name"])
+            if appifo2["state"] != "OPEN":
+                self.assertEqual(appifo2["state"],applist_t[i]["state"])
+                if (applist_t[i]["content"].find("[New]", 0, 5) != -1):
+                    applist_t[i]["content"] = applist_t[i]["content"][6:]
+                self.assertEqual(appifo2["content"].replace(" ","").replace("\n",""),applist_t[i]["content"].replace(" ",""))
+                self.assertEqual(appifo2["size"],applist_t[i]["size"])
+
+                print "@@@"
+                print appifo2
+                print self.aota_update_app[i]
+                self.assertEqual(appifo2 in self.aota_update_app , True)
+
+            i = i + 1
+
+        self.wd.reset()
+        self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
+        for i in range(1, 10):
+            common.swape_bygiven(self.wd, "aotacheck")
+            try:
+                self.wd.find_element_by_id("com.tcl.ota:id/update_available")
+            except NoSuchElementException, e:
+                time.sleep(5)
+            else:
+                print "Check for app update successfully"
+                break
+            if i > 8:
+                print "ERROR:check for app list failed"
+        self.wd.open_notifications()
+
+
+        display_icon = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("android:id/expand_button")')
+        if len(display_icon) != 0:
+            for display_icon_t in display_icon:
+                display_icon_t.click()
+        
+
+
+
+
+
+
+
+
 
 
 
