@@ -29,7 +29,7 @@ def capabilities_set(device_num):
     capabilities['resetKeyboard'] = 'True'
     capabilities['appPackage'] = 'com.tcl.ota'
     capabilities['appActivity'] = 'com.tcl.ota.SystemUpdatesActivity'
-    capabilities['app'] = 'C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\Fota_Global_v7.0.10.3.0626.0_signed_platformkey_alldpi.apk'
+    capabilities['app'] = 'C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\Fota_GL_v7.0.10.3.0655.0_signed_platformkey_alldpi.apk'
     capabilities['noReset'] = 'True'
 
     return capabilities

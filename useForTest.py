@@ -42,7 +42,7 @@ class AppTest(unittest.TestCase):
     def test_putupdatetoscreen(self):
         self.wd.reset()
         self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
-        for i in range(1, 10):
+        for i in range(1, 10):      #手动check AOTA更新
             common.swape_bygiven(self.wd, "aotacheck")
             try:
                 self.wd.find_element_by_id("com.tcl.ota:id/update_available")
@@ -56,7 +56,7 @@ class AppTest(unittest.TestCase):
         applist = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/name")')
         applist_t = []
 
-        for appelm1 in applist:
+        for appelm1 in applist:        #获取AOTA app列表中的项
             appname = appelm1.get_attribute("text")
             applist_t.append({"name": appname , "size": "", "description": "", "content": "","state":""})
         app_button = self.wd.find_elements_by_class_name("android.widget.Button")
@@ -72,7 +72,7 @@ class AppTest(unittest.TestCase):
 
         app_content = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/app_content")')
         i = 0
-        for app_content_elm in app_content:
+        for app_content_elm in app_content:     #将applist中获取的content 项加入到 app列表数组中
             contenttext = app_content_elm.get_attribute("text")
             applist_t[i]["content"] = contenttext
             i = i + 1
@@ -80,7 +80,7 @@ class AppTest(unittest.TestCase):
         app_size = self.wd.find_elements_by_android_uiautomator(
             'new UiSelector().resourceId("com.tcl.ota:id/status")')
         i = 0
-        for app_size_elm in app_size:
+        for app_size_elm in app_size:   #将applist中获取的size 项加入到 app列表数组中
             size_num = app_size_elm.get_attribute("text")
             applist_t[i]["size"] = size_num
             i = i + 1
@@ -88,8 +88,8 @@ class AppTest(unittest.TestCase):
         for appifo in applist_t:
             print appifo
 
-        app_detail_list = []
-        for appelm1 in applist:
+        app_detail_list = []        #创建详情界面applist
+        for appelm1 in applist:     #获取所有applist应用详情页面的信息
             appelm1.click()
             common.swape_bygiven(self.wd,"allappdown")
             time.sleep(2)
@@ -122,7 +122,7 @@ class AppTest(unittest.TestCase):
         i = 0
         for appifo1 in app_detail_list:
             print appifo1
-        for appifo2 in app_detail_list:
+        for appifo2 in app_detail_list: #对比详情页面和applist页面中的信息是否一致
             self.assertEqual(appifo2["name"],applist_t[i]["name"])
             if appifo2["state"] != "OPEN":
                 self.assertEqual(appifo2["state"],applist_t[i]["state"])
@@ -138,7 +138,7 @@ class AppTest(unittest.TestCase):
 
             i = i + 1
 
-        self.wd.reset()
+        self.wd.reset()     #重置手机并重新check applist
         self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
         for i in range(1, 10):
             common.swape_bygiven(self.wd, "aotacheck")
@@ -155,10 +155,45 @@ class AppTest(unittest.TestCase):
 
 
         display_icon = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("android:id/expand_button")')
-        if len(display_icon) != 0:
+        if len(display_icon) != 0:      #打开notification bar 并显示所有的隐藏按钮
             for display_icon_t in display_icon:
                 display_icon_t.click()
-        
+
+        try:            #点击新安装的应用的按钮INSTALL
+            install_button_noti = self.wd.find_element_by_accessibility_id("INSTALL ALL")
+        except NoSuchElementException,e:
+            install_button_noti = self.wd.find_element_by_accessibility_id("INSTALL")
+        else:
+            pass
+        finally:
+            install_button_noti.click()
+
+        i = 0
+        for new_installapp in applist_t:    #查看点击安装按钮后在notification 中是否有新安装应用的安装进度显示
+            if new_installapp["state"] == "INSTALL":
+                try:
+                    install_noti_str = "Updateing " + new_installapp["name"]
+                    install_noti_str_find = 'new UiSelector().text("' + install_noti_str + '")'
+                    self.wd.find_element_by_android_uiautomator(install_noti_str_find).click()
+                except NoSuchElementException,e
+                    pass
+                else:
+                    i = 1
+                    break
+
+        if i == 0:
+            print "ERROR: installing new apk not displayed in nitification bar "
+
+        self.wd.find
+
+
+
+
+
+
+
+
+
 
 
 
