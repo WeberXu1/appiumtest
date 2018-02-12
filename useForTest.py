@@ -40,19 +40,7 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
-        self.wd.reset()
-        self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
-        for i in range(1, 10):      #手动check AOTA更新
-            common.swape_bygiven(self.wd, "aotacheck")
-            try:
-                self.wd.find_element_by_id("com.tcl.ota:id/update_available")
-            except NoSuchElementException, e:
-                time.sleep(5)
-            else:
-                print "Check for app update successfully"
-                break
-            if i > 8:
-                print "ERROR:check for app list failed"
+        self.aota_applist_load()
         applist = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/name")')
         applist_t = []
 
@@ -138,53 +126,38 @@ class AppTest(unittest.TestCase):
 
             i = i + 1
 
-        self.wd.reset()     #重置手机并重新check applist
-        self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
-        for i in range(1, 10):
-            common.swape_bygiven(self.wd, "aotacheck")
-            try:
-                self.wd.find_element_by_id("com.tcl.ota:id/update_available")
-            except NoSuchElementException, e:
-                time.sleep(5)
-            else:
-                print "Check for app update successfully"
-                break
-            if i > 8:
-                print "ERROR:check for app list failed"
-        self.wd.open_notifications()
+        self.aota_applist_load()
+        self.open_noti_button()
+        self.click_button_noti("INSTALL")
+        self.check_aota_state(applist_t , app_button, "INSTALL")
+
+        self.aota_applist_load()
+        self.open_noti_button()
+        self.click_button_noti("UPDATE")
+        self.check_aota_state(applist_t, app_button, "UPDATE")
 
 
-        display_icon = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("android:id/expand_button")')
-        if len(display_icon) != 0:      #打开notification bar 并显示所有的隐藏按钮
-            for display_icon_t in display_icon:
-                display_icon_t.click()
 
-        try:            #点击新安装的应用的按钮INSTALL
-            install_button_noti = self.wd.find_element_by_accessibility_id("INSTALL ALL")
-        except NoSuchElementException,e:
-            install_button_noti = self.wd.find_element_by_accessibility_id("INSTALL")
-        else:
-            pass
-        finally:
-            install_button_noti.click()
 
-        i = 0
-        for new_installapp in applist_t:    #查看点击安装按钮后在notification 中是否有新安装应用的安装进度显示
-            if new_installapp["state"] == "INSTALL":
-                try:
-                    install_noti_str = "Updateing " + new_installapp["name"]
-                    install_noti_str_find = 'new UiSelector().text("' + install_noti_str + '")'
-                    self.wd.find_element_by_android_uiautomator(install_noti_str_find).click()
-                except NoSuchElementException,e
-                    pass
-                else:
-                    i = 1
-                    break
 
-        if i == 0:
-            print "ERROR: installing new apk not displayed in nitification bar "
 
-        self.wd.find
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -210,6 +183,89 @@ class AppTest(unittest.TestCase):
     def tearDown(self):
         self.wd.quit()
 
+    def aota_applist_load(self):
+        self.wd.reset()  # 重置手机并重新check applist
+        self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
+        for i in range(1, 10):
+            common.swape_bygiven(self.wd, "aotacheck")
+            try:
+                self.wd.find_element_by_id("com.tcl.ota:id/update_available")
+            except NoSuchElementException, e:
+                time.sleep(5)
+            else:
+                print "Check for app update successfully"
+                break
+            if i > 8:
+                print "ERROR:check for app list failed"
+
+    def open_noti_button(self):
+        self.wd.open_notifications()
+        display_icon = self.wd.find_elements_by_android_uiautomator(
+            'new UiSelector().resourceId("android:id/expand_button")')
+        if len(display_icon) != 0:  # 打开notification bar 并显示所有的隐藏按钮
+            for display_icon_t in display_icon:
+                display_icon_t.click()
+
+    def click_button_noti(self,button):
+        try:
+            button_all = button + " ALL"#点击新安装的应用的按钮INSTALL
+            install_button_noti = self.wd.find_element_by_accessibility_id(button_all)
+        except NoSuchElementException,e:
+            install_button_noti = self.wd.find_element_by_accessibility_id(button)
+        else:
+            pass
+        finally:
+            install_button_noti.click()
+            print "Click the " + button + "button successfully"
+
+    def check_aota_state(self,applist1,appnonlystate,mode):
+        for installing_app in reversed(applist1):
+            if installing_app["state"] == mode:
+                str = "Updating" + installing_app["name"]
+                try:
+                    new_install_noti = self.wd.find_element_by_android_uiautomator('new UiSelector().text("' + str + '")')
+                except NoSuchElementException,e:
+                    print "ERROR:No downloading notification after click " + mode + " all button"
+                else:
+                    print "Downloading notification normally"
+                    new_install_noti.click()
+                now_applist_state = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/update_button")')
+                installing_app_state = now_applist_state[applist1.index(installing_app)]
+                self.assertEqual(installing_app_state.get_attribute("text"),u"PAUSE")
+                installing_app_content = self.wd.find_element_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/progressvalue")')
+                self.assertEqual(installing_app_content.get_attribute("text"),"Downloading")
+                print "Check the downloading state successfully in AOTA interface "
+
+                installing_app_state.click()
+                now_applist_state = self.wd.find_elements_by_android_uiautomator(
+                    'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
+                installing_app_state = now_applist_state[applist1.index(installing_app)]
+                self.assertEqual(installing_app_state.get_attribute("text"), u"RESUME")
+
+
+                installing_app_content = self.wd.find_element_by_android_uiautomator(
+                    'new UiSelector().resourceId("com.tcl.ota:id/progressvalue")')
+                self.assertEqual(installing_app_content.get_attribute("text"), u"Paused")
+
+                print "PAUSE " + mode + "in AOTA interface successfully"
+                installing_app_state.click()
+                print "Wait for downloading finished"
+                while True:
+                    self.wd.press_keycode(3)
+                    self.wd.launch_app()
+                    self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
+                    now_applist_state = self.wd.find_elements_by_android_uiautomator(
+                        'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
+                    if len(now_applist_state) != (len(appnonlystate) - 1):
+                        str2 = 'new UiSelector().text("' +  installing_app["name"] + '")'
+                        common.swape_findelm(self.wd,"allappdown",str2,MobileBy.ANDROID_UIAUTOMATOR).click()
+                        detail_button = self.wd.find_element_by_id("com.tcl.ota:id/update_button")
+                        self.assertEqual(detail_button.get_attribute("text"),"OPEN")
+                        self.wd.press_keycode(4)
+                        print "New app " + mode + " successfully"
+                        break
+                    time.sleep(5)
+                break
 if __name__ == '__main__':
     unittest.main()
 
