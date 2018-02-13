@@ -236,34 +236,66 @@ class AppTest(unittest.TestCase):
                 self.assertEqual(installing_app_content.get_attribute("text"),"Downloading")
                 print "Check the downloading state successfully in AOTA interface "
 
-                installing_app_state.click()
+                self.aota_applist_load()
+
+
                 now_applist_state = self.wd.find_elements_by_android_uiautomator(
                     'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
                 installing_app_state = now_applist_state[applist1.index(installing_app)]
-                self.assertEqual(installing_app_state.get_attribute("text"), u"RESUME")
-
-
-                installing_app_content = self.wd.find_element_by_android_uiautomator(
-                    'new UiSelector().resourceId("com.tcl.ota:id/progressvalue")')
-                self.assertEqual(installing_app_content.get_attribute("text"), u"Paused")
-
-                print "PAUSE " + mode + "in AOTA interface successfully"
+                #self.assertEqual(installing_app_state.get_attribute("text"), u"RESUME")
                 installing_app_state.click()
+
+                now_applist_state = self.wd.find_elements_by_android_uiautomator(
+                    'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
+                installing_app_state = now_applist_state[applist1.index(installing_app)]
+                self.assertEqual(installing_app_state.get_attribute("text"), u"Paused")
+                installing_app_state.click()
+
+
+                now_applist_state = self.wd.find_elements_by_android_uiautomator(
+                    'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
+                installing_app_state = now_applist_state[applist1.index(installing_app)]
+                self.assertEqual(installing_app_state.get_attribute("text"), u"Resume")
+                installing_app_state.click()
+                print "PAUSE " + mode + "in AOTA interface successfully"
+
+                now_applist_state = self.wd.find_elements_by_android_uiautomator(
+                    'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
+                installing_app_state = now_applist_state[applist1.index(installing_app)]
+                self.assertEqual(installing_app_state.get_attribute("text"), u"Pause")
+                print "RESUME " + mode + "in AOTA interface successfully"
+
+
                 print "Wait for downloading finished"
+
                 while True:
                     self.wd.press_keycode(3)
                     self.wd.launch_app()
                     self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
                     now_applist_state = self.wd.find_elements_by_android_uiautomator(
                         'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
-                    if len(now_applist_state) != (len(appnonlystate) - 1):
-                        str2 = 'new UiSelector().text("' +  installing_app["name"] + '")'
-                        common.swape_findelm(self.wd,"allappdown",str2,MobileBy.ANDROID_UIAUTOMATOR).click()
-                        detail_button = self.wd.find_element_by_id("com.tcl.ota:id/update_button")
-                        self.assertEqual(detail_button.get_attribute("text"),"OPEN")
-                        self.wd.press_keycode(4)
-                        print "New app " + mode + " successfully"
-                        break
+                    if mode == "INSTALL":
+                        if len(now_applist_state) != (len(appnonlystate) - 1):
+                            str2 = 'new UiSelector().text("' +  installing_app["name"] + '")'
+                            common.swape_findelm(self.wd,"allappdown",str2,MobileBy.ANDROID_UIAUTOMATOR).click()
+                            detail_button = self.wd.find_element_by_id("com.tcl.ota:id/update_button")
+                            self.assertEqual(detail_button.get_attribute("text"),"OPEN")
+                            self.wd.press_keycode(4)
+                            print "New app " + mode + " successfully"
+                            break
+                    elif mode == "UPDATE":
+                        if len(now_applist_state) != (len(appnonlystate) - 1):
+                            str2 = 'new UiSelector().text("' + installing_app["name"] + '")'
+                            common.swape_findelm(self.wd, "allappdown", str2, MobileBy.ANDROID_UIAUTOMATOR).click()
+                            detail_button = self.wd.find_element_by_id("com.tcl.ota:id/update_button")
+                            self.assertEqual(detail_button.get_attribute("text"), "OPEN")
+                            self.wd.press_keycode(4)
+                            print "UPDATE app " + mode + " successfully"
+                            break
+                        installing_app_state = now_applist_state[now_applist_state[applist1.index(installing_app)]]
+                        if installing_app_state.get_attribute("text") == "INSTALL":
+                            print "UPDATE APP download successfully"
+                            installing_app_state.click()
                     time.sleep(5)
                 break
 if __name__ == '__main__':
