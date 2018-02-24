@@ -31,11 +31,11 @@ print "finished"
 
 #Later function
 # self.wd.find_elements_by_android_uiautomator('new UiSelector().package("com.tcl.ota").text("LATER")').click()
-# bettery_num2 = common.get_bettery(self.wd)
+# bettery_num2 = self.wd.get_bettery(self.wd)
 # if bettery_num2 > 95 and bettery_num2 < 100:
 #     for i in range(1,4):
 #         time.sleep(1800)
-#         bettery_num3 = common.get_bettery(self.wd)
+#         bettery_num3 = self.wd.get_bettery(self.wd)
 #         if bettery_num3 == 100:
 #             break
 # try:

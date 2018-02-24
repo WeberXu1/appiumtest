@@ -17,8 +17,8 @@ from appium.webdriver.common.touch_action import TouchAction
 class AppTest(unittest.TestCase):
 
     def setUp(self):
-        self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub',common.capabilities_set(2))
-        common.read_logs(self.wd, 'logcat', ignore=True)
+        self.wd = common.UpdateWebDriver('http://127.0.0.1:4723/wd/hub')
+        self.wd.read_logs('logcat', ignore=True)
         print "begin logtime" + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
         self.aota_update_app = []
         aota_new_app = []
@@ -39,10 +39,11 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
+        self.wd.change_network(4)
         self.wd.reset()
         self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
         for i in range(1, 10):
-            common.swape_bygiven(self.wd, "aotacheck")
+            self.wd.swape_bygiven( "aotacheck")
             try:
                 self.wd.find_element_by_id("com.tcl.ota:id/update_available")
             except NoSuchElementException, e:
@@ -90,7 +91,7 @@ class AppTest(unittest.TestCase):
         app_detail_list = []
         for appelm1 in applist:
             appelm1.click()
-            common.swape_bygiven(self.wd,"allappdown")
+            self.wd.swape_bygiven("allappdown")
             time.sleep(2)
             appdet_state = self.wd.find_element_by_class_name("android.widget.Button").get_attribute("text")
             appdet_name = self.wd.find_element_by_id("com.tcl.ota:id/name").get_attribute("text")

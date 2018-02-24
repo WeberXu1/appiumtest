@@ -1,6 +1,6 @@
 #coding=utf-8
 import unittest
-#import selenium.common.exceptions
+#import selenium.self.wd.exceptions
 from appium import webdriver
 from selenium.common.exceptions import  NoSuchElementException
 from selenium.common.exceptions import WebDriverException
@@ -18,8 +18,8 @@ from appium.webdriver.common.touch_action import TouchAction
 class AppTest(unittest.TestCase):
 
     def setUp(self):
-        self.wd = webdriver.Remote('http://127.0.0.1:4723/wd/hub',common.capabilities_set(2))
-        common.read_logs(self.wd, 'logcat', ignore=True)
+        self.wd = common.UpdateWebDriver('http://127.0.0.1:4723/wd/hub')
+        self.wd.read_logs('logcat', ignore=True)
         print "begin logtime" + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
         self.aota_update_app = []
         aota_new_app = []
@@ -40,7 +40,7 @@ class AppTest(unittest.TestCase):
        # self.wd.implicitly_wait(60)
 
     def test_putupdatetoscreen(self):
-        self.aota_applist_load()
+        self.aota_applist_load(0)
         applist = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/name")')
         applist_t = []
 
@@ -79,7 +79,7 @@ class AppTest(unittest.TestCase):
         app_detail_list = []        #创建详情界面applist
         for appelm1 in applist:     #获取所有applist应用详情页面的信息
             appelm1.click()
-            common.swape_bygiven(self.wd,"allappdown")
+            self.wd.swape_bygiven("allappdown")
             time.sleep(2)
             appdet_state = self.wd.find_element_by_class_name("android.widget.Button").get_attribute("text")
             appdet_name = self.wd.find_element_by_id("com.tcl.ota:id/name").get_attribute("text")
@@ -126,12 +126,12 @@ class AppTest(unittest.TestCase):
 
             i = i + 1
 
-        self.aota_applist_load()
+        self.aota_applist_load(0)
         self.open_noti_button()
         self.click_button_noti("INSTALL")
         self.check_aota_state(applist_t , app_button, "INSTALL")
 
-        self.aota_applist_load()
+        self.aota_applist_load(0)
         self.open_noti_button()
         self.click_button_noti("UPDATE")
         self.check_aota_state(applist_t, app_button, "UPDATE")
@@ -180,14 +180,29 @@ class AppTest(unittest.TestCase):
 
 
 
+
     def tearDown(self):
         self.wd.quit()
 
-    def aota_applist_load(self):
-        self.wd.reset()  # 重置手机并重新check applist
+    def aota_applist_load(self, auto_type,network_type=2 ):
+        self.wd.reset()# 重置手机并重新check applist
+        if auto_type == 2 or auto_type == 0:#0:NEVER 1:Using Wi-Fi only 2:Using Wi-Fi & DATA
+            if auto_type == 2:
+                self.wd.set_network_connection(0)
+            else:
+                self.wd.set_network_connection(4)
+            self.wd.find_element_by_accessibility_id("More options").click()
+            self.wd.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
+            self.wd.find_element_by_android_uiautomator('new UiSelector().text("Automatically update")').click()
+            auto_type_issue = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("android:id/text1")')
+            auto_type_issue[auto_type].click()
+            self.wd.press_keycode(4)
+        elif auto_type != 1:
+            print "ERROR:WRONG parm"
+
         self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
         for i in range(1, 10):
-            common.swape_bygiven(self.wd, "aotacheck")
+            self.wd.swape_bygiven( "aotacheck")
             try:
                 self.wd.find_element_by_id("com.tcl.ota:id/update_available")
             except NoSuchElementException, e:
@@ -197,6 +212,10 @@ class AppTest(unittest.TestCase):
                 break
             if i > 8:
                 print "ERROR:check for app list failed"
+
+        if auto_type != 1:
+            self.wd.change_network(network_type)
+
 
     def open_noti_button(self):
         self.wd.open_notifications()
@@ -209,13 +228,13 @@ class AppTest(unittest.TestCase):
     def click_button_noti(self,button):
         try:
             button_all = button + " ALL"#点击新安装的应用的按钮INSTALL
-            install_button_noti = self.wd.find_element_by_accessibility_id(button_all)
+            self.install_button_noti = self.wd.find_element_by_accessibility_id(button_all)
         except NoSuchElementException,e:
-            install_button_noti = self.wd.find_element_by_accessibility_id(button)
+            self.install_button_noti = self.wd.find_element_by_accessibility_id(button)
         else:
             pass
         finally:
-            install_button_noti.click()
+            self.install_button_noti.click()
             print "Click the " + button + "button successfully"
 
     def check_aota_state(self,applist1,appnonlystate,mode):
@@ -236,7 +255,7 @@ class AppTest(unittest.TestCase):
                 self.assertEqual(installing_app_content.get_attribute("text"),"Downloading")
                 print "Check the downloading state successfully in AOTA interface "
 
-                self.aota_applist_load()
+                self.aota_applist_load(0)
 
 
                 now_applist_state = self.wd.find_elements_by_android_uiautomator(
@@ -277,7 +296,7 @@ class AppTest(unittest.TestCase):
                     if mode == "INSTALL":
                         if len(now_applist_state) != (len(appnonlystate) - 1):
                             str2 = 'new UiSelector().text("' +  installing_app["name"] + '")'
-                            common.swape_findelm(self.wd,"allappdown",str2,MobileBy.ANDROID_UIAUTOMATOR).click()
+                            self.wd.swape_findelm("allappdown",str2,MobileBy.ANDROID_UIAUTOMATOR).click()
                             detail_button = self.wd.find_element_by_id("com.tcl.ota:id/update_button")
                             self.assertEqual(detail_button.get_attribute("text"),"OPEN")
                             self.wd.press_keycode(4)
@@ -286,7 +305,7 @@ class AppTest(unittest.TestCase):
                     elif mode == "UPDATE":
                         if len(now_applist_state) != (len(appnonlystate) - 1):
                             str2 = 'new UiSelector().text("' + installing_app["name"] + '")'
-                            common.swape_findelm(self.wd, "allappdown", str2, MobileBy.ANDROID_UIAUTOMATOR).click()
+                            self.wd.swape_findelm( "allappdown", str2, MobileBy.ANDROID_UIAUTOMATOR).click()
                             detail_button = self.wd.find_element_by_id("com.tcl.ota:id/update_button")
                             self.assertEqual(detail_button.get_attribute("text"), "OPEN")
                             self.wd.press_keycode(4)
