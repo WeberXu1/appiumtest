@@ -301,23 +301,30 @@ class UpdateWebDriver(webdriver.Remote):
                     else:
                         self.click_dataicon(data_icon, "On")
                 finally:
-                    time.sleep(1)
-                    self.press_keycode(4)
-                    time.sleep(1)
-                    self.press_keycode(4)
+                    self.tap_mutiback(2)
         elif self.capabilities['platformVersion'] == '7.0':
             self.open_notifications()
             time.sleep(2)
             self.swape_bygiven("dragdown")
+            time.sleep(2)
             if network_type == 2 or network_type == 6:
                 try:
                     wifi_button = self.find_element_by_accessibility_id("Wi-Fi Off,Open Wi-Fi settings.")
                 except NoSuchElementException,e:
-                    pass
+                    self.press_keycode(4)
                 else:
                     wifi_button.click()
+                    self.tap_mutiback(3)
                     #here need click the open button
             elif network_type == 4 :
+                try:
+                    self.find_element_by_accessibility_id("Wi-Fi Off,Open Wi-Fi settings.")
+                except NoSuchElementException, e:
+                    self.find_element_by_android_uiautomator('new UiSelector().descriptionStartsWith("Wi-Fi")').click()
+                    self.find_element_by_id("android:id/toggle").click()
+                else:
+                    pass
+                time.sleep(2)
                 try:
                     self.find_element_by_accessibility_id("No SIM card,Open Cellular data settings.")
                 except NoSuchElementException,e:
@@ -326,8 +333,10 @@ class UpdateWebDriver(webdriver.Remote):
                     data_state = self.find_element_by_id("com.android.systemui:id/sim_toggle")
                     if data_state.get_attribute("text") == "Off":
                         data_state.click()
+                        self.press_keycode(4)
                     else:
-                        self.press_keycode(3)
+                        self.press_keycode(4)
+                    self.tap_mutiback(2)
 
                 else:
                     raise HavntInsertSim
@@ -340,12 +349,16 @@ class UpdateWebDriver(webdriver.Remote):
                     data_state = self.find_element_by_id("com.android.systemui:id/sim_toggle")
                     if data_state.get_attribute("text") == "On":
                         data_state.click()
+                        self.press_keycode(4)
                     else:
-                        self.press_keycode(3)
+                        self.press_keycode(4)
+                    self.tap_mutiback(2)
                 else:
-                    pass
+                    self.tap_mutiback(2)
             else:
                 print "ERROR:WRONG NETWORK TYPE"
+            network_chag_ifo =  "change network to " + network_type + " successfully!"
+            print network_chag_ifo
         else:
             print "ERROR: Now we don't support this android version network change "
 
@@ -412,9 +425,13 @@ class UpdateWebDriver(webdriver.Remote):
         time.sleep(2)
         bettery_icon = self.find_element_by_id("com.android.systemui:id/battery")
         bettery_value = int(bettery_icon.get_attribute("name").split(" ")[1])
-        self.press_keycode(4)
-        self.press_keycode(4)
+        self.tap_mutiback(2)
         return bettery_value
+
+    def tap_mutiback(self,times,internal=1):
+        for i in range(0,times):
+            time.sleep(internal)
+            self.press_keycode(4)
 
 class CantFindAppException(Exception):
     def __init__(self, err='Can not open update or update is not in app list'):

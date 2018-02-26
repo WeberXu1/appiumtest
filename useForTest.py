@@ -18,7 +18,7 @@ from appium.webdriver.common.touch_action import TouchAction
 class AppTest(unittest.TestCase):
 
     def setUp(self):
-        self.wd = common.UpdateWebDriver('http://127.0.0.1:4723/wd/hub')
+        self.wd = common.UpdateWebDriver('http://127.0.0.1:4723/wd/hub',2)
         self.wd.read_logs('logcat', ignore=True)
         print "begin logtime" + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
         self.aota_update_app = []
@@ -129,12 +129,14 @@ class AppTest(unittest.TestCase):
         self.aota_applist_load(0)
         self.open_noti_button()
         self.click_button_noti("INSTALL")
-        self.check_aota_state(applist_t , app_button, "INSTALL")
+        self.check_aota_state(applist_t, app_button, "INSTALL")
 
         self.aota_applist_load(0)
         self.open_noti_button()
         self.click_button_noti("UPDATE")
         self.check_aota_state(applist_t, app_button, "UPDATE")
+
+
 
 
 
@@ -188,10 +190,12 @@ class AppTest(unittest.TestCase):
         self.wd.reset()# 重置手机并重新check applist
         if auto_type == 2 or auto_type == 0:#0:NEVER 1:Using Wi-Fi only 2:Using Wi-Fi & DATA
             if auto_type == 2:
-                self.wd.set_network_connection(0)
+                self.wd.change_network(0)
             else:
-                self.wd.set_network_connection(4)
+                self.wd.change_network(4)
+            time.sleep(2)
             self.wd.find_element_by_accessibility_id("More options").click()
+            time.sleep(1)
             self.wd.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
             self.wd.find_element_by_android_uiautomator('new UiSelector().text("Automatically update")').click()
             auto_type_issue = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("android:id/text1")')
@@ -200,7 +204,8 @@ class AppTest(unittest.TestCase):
         elif auto_type != 1:
             print "ERROR:WRONG parm"
 
-        self.wd.find_elements_by_class_name('android.support.v7.app.ActionBar$Tab')[1].click()
+        time.sleep(2)
+        self.wd.find_element_by_android_uiautomator('new UiSelector().text("SYSTEM APPS")').click()
         for i in range(1, 10):
             self.wd.swape_bygiven( "aotacheck")
             try:
@@ -226,6 +231,7 @@ class AppTest(unittest.TestCase):
                 display_icon_t.click()
 
     def click_button_noti(self,button):
+        self.install_button_noti = ""
         try:
             button_all = button + " ALL"#点击新安装的应用的按钮INSTALL
             self.install_button_noti = self.wd.find_element_by_accessibility_id(button_all)

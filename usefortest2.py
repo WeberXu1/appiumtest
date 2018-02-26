@@ -14,6 +14,9 @@ import subprocess
 from selenium.webdriver.common.by import By
 from appium.webdriver.common.mobileby import MobileBy
 from appium.webdriver.common.touch_action import TouchAction
+import xlrd
+import xlwt
+import xdrlib,sys
 
 class AppTest(unittest.TestCase):
 
