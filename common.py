@@ -328,10 +328,10 @@ class UpdateWebDriver(webdriver.Remote):
                 try:
                     self.find_element_by_accessibility_id("No SIM card,Open Cellular data settings.")
                 except NoSuchElementException,e:
-                    data_button = self.find_element_by_accessibility_id("Mobile Mobile Data On. Phone four bars.. China Unicom.,Open Cellular data settings.")
+                    data_button = self.find_element_by_android_uiautomator('new UiSelector().descriptionStartsWith("Mobile Mobile Data On")')
                     data_button.click()
                     data_state = self.find_element_by_id("com.android.systemui:id/sim_toggle")
-                    if data_state.get_attribute("text") == "Off":
+                    if data_state.get_attribute("text") == "OFF":
                         data_state.click()
                         self.press_keycode(4)
                     else:
@@ -346,6 +346,7 @@ class UpdateWebDriver(webdriver.Remote):
                 except NoSuchElementException,e:
                     data_button = self.find_element_by_accessibility_id("Mobile Mobile Data On. Phone four bars.. China Unicom.,Open Cellular data settings.")
                     data_button.click()
+                    time.sleep(1)
                     data_state = self.find_element_by_id("com.android.systemui:id/sim_toggle")
                     if data_state.get_attribute("text") == "On":
                         data_state.click()
@@ -357,7 +358,7 @@ class UpdateWebDriver(webdriver.Remote):
                     self.tap_mutiback(2)
             else:
                 print "ERROR:WRONG NETWORK TYPE"
-            network_chag_ifo =  "change network to " + network_type + " successfully!"
+            network_chag_ifo =  "change network to " + str(network_type) + " successfully!"
             print network_chag_ifo
         else:
             print "ERROR: Now we don't support this android version network change "
