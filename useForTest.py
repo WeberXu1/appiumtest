@@ -228,18 +228,18 @@ class AppTest(unittest.TestCase):
             for display_icon_t in display_icon:
                 display_icon_t.click()
 
-    def click_button_noti(self,button):
-        self.install_button_noti = ""
+    def find_install_icon(self,button):
         try:
             button_all = button + " ALL"#点击新安装的应用的按钮INSTALL
-            self.install_button_noti = self.wd.find_element_by_accessibility_id(button_all)
+            install_button_noti = self.wd.find_element_by_accessibility_id(button_all)
         except NoSuchElementException,e:
-            self.install_button_noti = self.wd.find_element_by_accessibility_id(button)
+            return self.wd.find_element_by_accessibility_id(button)
         else:
-            pass
-        finally:
-            self.install_button_noti.click()
-            print "Click the " + button + "button successfully"
+            return install_button_noti
+
+    def click_button_noti(self,button):
+        self.find_install_icon(button).click()
+        print "Click the " + button + "button successfully"
 
     def check_aota_state(self,applist1,appnonlystate,mode):
         for installing_app in reversed(applist1):
