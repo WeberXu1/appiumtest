@@ -24,8 +24,7 @@ class AppTest(unittest.TestCase):
         self.aota_update_app = []
         aota_new_app = []
         aota_app1 = {"name": u"Apps", "size": u"10.0 MB", "description": u"""Apps is an application store of alcatel smartphone, which offers a variety of applications for free downloading. Discover and download apps or games for your phone or tablet through Apps. Enjoy millions of the latest Android apps and games. Anytime, anywhere, with your device. This new version can also help you clean up your phone, make it faster, and protect your cell phone from viruses. So, what are you waiting for? Update it now!
-                """, "content": u"""· Phone Booster A quick booster to free up RAM, clean background tasks, provide extra entrances in widgets, desktop shortcuts and notification toolbar. · Junk Files Cleaner Help analyze and safely remove junk files which take up your memory and storage space. · Antivirus - Virus Cleaner Protect your mobile from virus attack and keep your privacy safe. · Battery Saver Instantly find and fix battery power consumption problems and quickly scan your mobile, save the power consumption of apps and settings. · CPU Cooler Analyze CPU usage and stop overheating apps to cool down CPU temperature, with only 1-tap. · APP Uninstall Help you find rarely used apps, and uninstall unnecessary apps to save more space.
-                ""","state":u"UPDATE"}
+                """, "content": u"""· Phone Booster A quick booster to free up RAM, clean background tasks, provide extra entrances in widgets, desktop shortcuts and notification toolbar. · Junk Files Cleaner Help analyze and safely remove junk files which take up your memory and storage space. · Antivirus - Virus Cleaner Protect your mobile from virus attack and keep your privacy safe. · Battery Saver Instantly find and fix battery power consumption problems and quickly scan your mobile, save the power consumption of apps and settings. · CPU Cooler Analyze CPU usage and stop overheating apps to cool down CPU temperature, with only 1-tap. · APP Uninstall Help you find rarely used apps, and uninstall unnecessary apps to save more space.""","state":u"UPDATE"}
         aota_app2 = {"name": u"Files", "size": u"5.9 MB", "description": u"0525", "content": u"0525","state":u"UPDATE"}
         aota_app3 = {"name": u"Weather", "size": u"22.5 MB", "description": u"wqwewqqwe", "content": u"weqqewqwe","state":u"UPDATE"}
         aota_app4 = {"name": u"Turbo Browser", "size": u"10.5 MB", "description": u"Turbo Browser, the top ultra-fast and lightweight browser for Android mobile, provides incognito browsing and fast web opening for all the users. It enables fast downloading of video, image, doc, PDF & files; secure & fluent browsing with ad blocker and antivirus. Night mode is included to give you the comfortable browsing experience.", "content": u"Features:\n\u2714Private Search\n\u2714Adblocker Provided\n\u2714Fast Open and Download\n\u2714Multiple Search Engines\n\u2714Data Saving\n\u2714News Feed\n\u2714Night Mode\n\u2714Switch Text Font\n\nTry the super fast browser for Android right now!\n\nContact Us:\nFor any issue or suggestion, please send us feedbacks via: \nTwitter: https://twitter.com/TurboBrowser_\nFacebook: https://www.facebook.com/TheTurboBrowser/\nG+: https://plus.google.com/u/1/communities/116473561383982061062","state":u"INSTALL"}
@@ -57,6 +56,7 @@ class AppTest(unittest.TestCase):
 
 
         app_content = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/app_content")')
+        print app_content
         i = 0
         for app_content_elm in app_content:     #将applist中获取的content 项加入到 app列表数组中
             contenttext = app_content_elm.get_attribute("text")
@@ -89,8 +89,12 @@ class AppTest(unittest.TestCase):
             else:
                 appdet_content_s = ""
                 appdet_size = ""
-            time.sleep(1)
+            time.sleep(2)
             appdet_detail = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/expandable_text")')
+            if len(appdet_detail) == 0:
+                time.sleep(5)
+                appdet_detail = self.wd.find_elements_by_android_uiautomator(
+                    'new UiSelector().resourceId("com.tcl.ota:id/expandable_text")')
             appdet_description = appdet_detail[0].get_attribute("text")
             appdet_content = appdet_detail[1].get_attribute("text")
             if (appdet_content_s != ""):
@@ -120,7 +124,14 @@ class AppTest(unittest.TestCase):
                 print "@@@"
                 print appifo2
                 print self.aota_update_app[i]
-                self.assertEqual(appifo2 in self.aota_update_app , True)
+                #self.assertEqual(appifo2 in self.aota_update_app , True)
+                self.assertEqual(appifo2["state"], self.aota_update_app[i]["state"])
+                print appifo2["content"]
+                print appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741","")
+                print "%r" % (appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741",""))
+                print "%r" % (self.aota_update_app[i]["content"].replace(" ", ""))
+                self.assertEqual(appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741",""),self.aota_update_app[i]["content"].replace(" ", "").replace("\n", ""))
+                self.assertEqual(appifo2["size"], self.aota_update_app[i]["size"])
 
             i = i + 1
 
@@ -185,12 +196,13 @@ class AppTest(unittest.TestCase):
         self.wd.quit()
 
     def aota_applist_load(self, auto_type,network_type=2 ):
-        self.wd.reset()# 重置手机并重新check applist
         if auto_type == 2 or auto_type == 0:#0:NEVER 1:Using Wi-Fi only 2:Using Wi-Fi & DATA
             if auto_type == 2:
                 self.wd.change_network(0)
             else:
                 self.wd.change_network(4)
+            self.wd.reset()
+            # 重置手机并重新check applist
             time.sleep(2)
             self.wd.find_element_by_accessibility_id("More options").click()
             time.sleep(1)
@@ -201,6 +213,8 @@ class AppTest(unittest.TestCase):
             self.wd.press_keycode(4)
         elif auto_type != 1:
             print "ERROR:WRONG parm"
+        else:
+            self.wd.reset()
 
         time.sleep(2)
         self.wd.find_element_by_android_uiautomator('new UiSelector().text("SYSTEM APPS")').click()
@@ -261,7 +275,6 @@ class AppTest(unittest.TestCase):
 
                 self.aota_applist_load(0)
 
-
                 now_applist_state = self.wd.find_elements_by_android_uiautomator(
                     'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
                 installing_app_state = now_applist_state[applist1.index(installing_app)]
@@ -321,6 +334,7 @@ class AppTest(unittest.TestCase):
                             installing_app_state.click()
                     time.sleep(5)
                 break
+
 if __name__ == '__main__':
     unittest.main()
 
