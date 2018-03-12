@@ -38,17 +38,7 @@ class AppTest(unittest.TestCase):
 
     def test_putupdatetoscreen(self):
         self.aota_applist_load(0)
-        time.sleep(5)
-        applist = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/name")')
-        while True:
-            if len(applist) == 0:
-                time.sleep(5)
-                applist = self.wd.find_elements_by_android_uiautomator(
-                    'new UiSelector().resourceId("com.tcl.ota:id/name")')
-            else:
-                print "APP name get successfully"
-                break
-
+        applist = self.wd.try_findeletimes('new UiSelector().resourceId("com.tcl.ota:id/name")',MobileBy.ANDROID_UIAUTOMATOR)
         applist_t = []
 
         for appelm1 in applist:  # 获取AOTA app列表中的项
@@ -59,10 +49,8 @@ class AppTest(unittest.TestCase):
         for app_button_elm in app_button:
             buttonname = app_button_elm.get_attribute("text")
             if (buttonname == "UPDATE" or buttonname == "INSTALL" or buttonname == "PAUSE" or buttonname == "RESUME"):
-                if len(applist_t) < i:
-                    print "state num more than appname's num, check the applist"
-                if len(applist_t) == 0:
-                    print applist
+                if len(applist_t) < i: print "state num more than appname's num, check the applist"
+                if len(applist_t) == 0: print applist
                 applist_t[i]["state"] = buttonname
                 i = i + 1
 
@@ -96,21 +84,11 @@ class AppTest(unittest.TestCase):
             if (appdet_state == "INSTALL" or appdet_state == "UPDATE"):
                 appdet_content_s = self.wd.find_element_by_id("com.tcl.ota:id/app_content").get_attribute("text")
                 appdet_size = self.wd.find_element_by_id("com.tcl.ota:id/app_size").get_attribute("text")
-                if (appdet_content_s.find("[New]", 0, 5) != -1):
-                    appdet_content_s = appdet_content_s[6:]
+                if (appdet_content_s.find("[New]", 0, 5) != -1):appdet_content_s = appdet_content_s[6:]                    
             else:
                 appdet_content_s = ""
                 appdet_size = ""
-            time.sleep(2)
-            appdet_detail = self.wd.find_elements_by_android_uiautomator(
-                'new UiSelector().resourceId("com.tcl.ota:id/expandable_text")')
-            while True:
-                if len(appdet_detail) == 0:
-                    time.sleep(5)
-                    appdet_detail = self.wd.find_elements_by_android_uiautomator(
-                        'new UiSelector().resourceId("com.tcl.ota:id/expandable_text")')
-                else:
-                    break
+            appdet_detail = self.wd.try_findeletimes('new UiSelector().resourceId("com.tcl.ota:id/expandable_text")',,MobileBy.ANDROID_UIAUTOMATOR)
             appdet_description = appdet_detail[0].get_attribute("text")
             appdet_content = appdet_detail[1].get_attribute("text")
             if (appdet_content_s != ""):
@@ -262,7 +240,7 @@ class AppTest(unittest.TestCase):
         self.wd.open_notifications()
         display_icon = self.wd.find_elements_by_android_uiautomator(
             'new UiSelector().resourceId("android:id/expand_button")')
-        if len(display_icon) != 0:  # 打开notification bar 并显示所有的隐藏按钮
+        if len(display_icon) == 2:  # 打开notification bar 并显示所有的隐藏按钮
             print display_icon
             print len(display_icon)
             display_icon[1].click()
@@ -289,20 +267,19 @@ class AppTest(unittest.TestCase):
     def check_aota_state(self,applist1,appnonlystate,mode):
         for installing_app in reversed(applist1):
             if installing_app["state"] == mode:
-                str = "Updating" + installing_app["name"]
-                try:
-                    new_install_noti = self.wd.find_element_by_android_uiautomator('new UiSelector().text("' + str + '")')
-                except NoSuchElementException,e:
+                str = "Updating " + installing_app["name"]
+                print str
+                new_install_noti = self.wd.find_elements_by_android_uiautomator('new UiSelector().text("' + str + '")')
+                if len(new_install_noti) == 0:
                     print "ERROR:No downloading notification after click " + mode + " all button"
                     self.wd.press_keycode(4)
                 else:
                     print "Downloading notification normally"
-                    new_install_noti.click()
+                    new_install_noti[0].click()
 
-                time.sleep(3)
                 now_applist_state = self.wd.find_elements_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/update_button")')
-                print applist1.index(installing_app)
-                print now_applist_state
+                #print applist1.index(installing_app)
+                #print now_applist_state
                 installing_app_state = now_applist_state[applist1.index(installing_app)]
                 self.assertEqual(installing_app_state.get_attribute("text"),u"PAUSE")
                 installing_app_content = self.wd.find_element_by_android_uiautomator('new UiSelector().resourceId("com.tcl.ota:id/progressvalue")')
@@ -310,7 +287,7 @@ class AppTest(unittest.TestCase):
                 print "Check the downloading state successfully in AOTA interface "
 
                 self.aota_applist_load(0)
-
+                time.sleep(2)
                 now_applist_state = self.wd.find_elements_by_android_uiautomator(
                     'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
                 installing_app_state = now_applist_state[applist1.index(installing_app)]
@@ -323,7 +300,7 @@ class AppTest(unittest.TestCase):
                 self.assertEqual(installing_app_state.get_attribute("text"), u"PAUSE")
                 installing_app_state.click()
 
-
+                time.sleep(2)
                 now_applist_state = self.wd.find_elements_by_android_uiautomator(
                     'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
                 installing_app_state = now_applist_state[applist1.index(installing_app)]
@@ -331,6 +308,7 @@ class AppTest(unittest.TestCase):
                 installing_app_state.click()
                 print "PAUSE " + mode + "in AOTA interface successfully"
 
+                time.sleep(2)
                 now_applist_state = self.wd.find_elements_by_android_uiautomator(
                     'new UiSelector().resourceId("com.tcl.ota:id/update_button")')
                 installing_app_state = now_applist_state[applist1.index(installing_app)]
@@ -349,7 +327,7 @@ class AppTest(unittest.TestCase):
                     if mode == "INSTALL":
                         if len(now_applist_state) != (len(appnonlystate) - 1):
                             str2 = 'new UiSelector().text("' +  installing_app["name"] + '")'
-                            self.wd.swape_findelm("allappdown",str2,MobileBy.ANDROID_UIAUTOMATOR).click()
+                            self.wd.swape_findelm("  allappdown",str2,MobileBy.ANDROID_UIAUTOMATOR).click()
                             detail_button = self.wd.find_element_by_id("com.tcl.ota:id/update_button")
                             self.assertEqual(detail_button.get_attribute("text"),"OPEN")
                             self.wd.press_keycode(4)

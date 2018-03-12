@@ -434,6 +434,17 @@ class UpdateWebDriver(webdriver.Remote):
             time.sleep(internal)
             self.press_keycode(4)
 
+    def try_findeletimes(self, value, by=By.ACCESSIBILITY_ID, times=5, internal=3):
+        for i in range(0,times):
+            time.sleep(internal)
+            applist = self.find_elements(by,value)
+            if len(applist) != 0:
+                print "ele name find successfully"
+                return applist
+            if i == (times - 1):
+                return []
+
+
 class CantFindAppException(Exception):
     def __init__(self, err='Can not open update or update is not in app list'):
         Exception.__init__(self, err)
