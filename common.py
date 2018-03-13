@@ -315,6 +315,8 @@ class UpdateWebDriver(webdriver.Remote):
                 else:
                     wifi_button.click()
                     self.tap_mutiback(3)
+                finally:
+                    time.sleep(3)
                     #here need click the open button
             elif network_type == 4 :
                 try:
