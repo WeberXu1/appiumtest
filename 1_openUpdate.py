@@ -22,8 +22,8 @@ class AppTest(unittest.TestCase):
         #Open updates in Allapplist
         try:
             updateelm = self.wd.allapp_find_app("Updates")
-        except common.CantFindAppException,e:
-            print e
+        except common.CantFindAppException as e:
+            print(e)
         else:
             updateelm.click()
 
@@ -53,7 +53,7 @@ class AppTest(unittest.TestCase):
             openupdate = self.wd.open_appinhomescreen("Updates")
 
         if not (openupdate):
-            print "process mistake,can not open app in homescreen"
+            print("process mistake,can not open app in homescreen")
         time.sleep(2)
         self.assertEqual(self.wd.current_activity, ".SystemUpdatesActivity")
         s2_logs = self.wd.write_logs(self.wd.read_logs('logcat'), 'D:/test/logs/openupdates_2.log')
@@ -79,7 +79,7 @@ class AppTest(unittest.TestCase):
         except:
             pass
         else:
-            print"open about phone success"
+            print("open about phone success")
         self.wd.find_element_by_android_uiautomator('new UiSelector().text("Updates")').click()
         time.sleep(2)
         self.assertEqual(self.wd.current_activity, ".SystemUpdatesActivity")

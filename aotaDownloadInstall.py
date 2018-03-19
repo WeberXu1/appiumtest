@@ -19,7 +19,7 @@ class AppTest(unittest.TestCase):
     def setUp(self):
         self.wd = common.UpdateWebDriver('http://127.0.0.1:4723/wd/hub')
         self.wd.read_logs('logcat', ignore=True)
-        print "begin logtime" + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        print("begin logtime" + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
         self.aota_update_app = []
         aota_new_app = []
         aota_app1 = {"name": u"Apps", "size": u"10.0 MB", "description": u"""
@@ -52,15 +52,15 @@ class AppTest(unittest.TestCase):
             buttonname = app_button_elm.get_attribute("text")
             if (buttonname == "UPDATE" or buttonname == "INSTALL" or buttonname == "PAUSE" or buttonname == "RESUME"):
                 if len(applist_t) < i:
-                    print "state num more than appname's num, check the applist"
+                    print("state num more than appname's num, check the applist")
                 if len(applist_t) == 0:
-                    print applist
+                    print(applist)
                 applist_t[i]["state"] = buttonname
                 i = i + 1
 
         app_content = self.wd.find_elements_by_android_uiautomator(
             'new UiSelector().resourceId("com.tcl.ota:id/app_content")')
-        print app_content
+        print(app_content)
         i = 0
         for app_content_elm in app_content:  # 将applist中获取的content 项加入到 app列表数组中
             contenttext = app_content_elm.get_attribute("text")
@@ -76,7 +76,7 @@ class AppTest(unittest.TestCase):
             i = i + 1
 
         for appifo in applist_t:
-            print appifo
+            print(appifo)
 
         app_detail_list = []  # 创建详情界面applist
         for appelm1 in applist:  # 获取所有applist应用详情页面的信息
@@ -107,19 +107,19 @@ class AppTest(unittest.TestCase):
             appdet_content = appdet_detail[1].get_attribute("text")
             if (appdet_content_s != ""):
                 if appdet_content.replace("\n", "").replace(" ", "") != appdet_content_s.replace(" ", ""):
-                    print "xontent : %r" % appdet_content.replace("\n", "").replace(" ", "")
-                    print "xontent short: %r " % appdet_content_s.replace(" ", "")
-                    print "ERROR:app content in detail is different from short one"
+                    print("xontent : %r" % appdet_content.replace("\n", "").replace(" ", ""))
+                    print("xontent short: %r " % appdet_content_s.replace(" ", ""))
+                    print("ERROR:app content in detail is different from short one")
 
             app_detail = {"name": appdet_name, "size": appdet_size, "description": appdet_description,
                           "content": appdet_content, "state": appdet_state}
             app_detail_list.append(app_detail)
             self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_app_bar_close").click()
 
-        print "NOW APPDETAIL"
+        print("NOW APPDETAIL")
         i = 0
         for appifo1 in app_detail_list:
-            print appifo1
+            print(appifo1)
         for appifo2 in app_detail_list:  # 对比详情页面和applist页面中的信息是否一致
             self.assertEqual(appifo2["name"], applist_t[i]["name"])
             if appifo2["state"] != "OPEN":
@@ -130,15 +130,15 @@ class AppTest(unittest.TestCase):
                                  applist_t[i]["content"].replace(" ", ""))
                 self.assertEqual(appifo2["size"], applist_t[i]["size"])
 
-                print "@@@"
-                print appifo2
-                print self.aota_update_app[i]
+                print("@@@")
+                print(appifo2)
+                print(self.aota_update_app[i])
                 # self.assertEqual(appifo2 in self.aota_update_app , True)
                 self.assertEqual(appifo2["state"], self.aota_update_app[i]["state"])
-                print appifo2["content"]
-                print appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741", "")
-                print "%r" % (appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741", ""))
-                print "%r" % (self.aota_update_app[i]["content"].replace(" ", ""))
+                print(appifo2["content"])
+                print(appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741", ""))
+                print("%r" % (appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741", "")))
+                print("%r" % (self.aota_update_app[i]["content"].replace(" ", "")))
                 self.assertEqual(appifo2["content"].replace(" ", "").replace("\n", "").replace("\u2741", ""),
                                  self.aota_update_app[i]["content"].replace(" ", "").replace("\n", ""))
                 self.assertEqual(appifo2["size"], self.aota_update_app[i]["size"])

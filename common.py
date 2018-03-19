@@ -23,12 +23,6 @@ class UpdateWebDriver(webdriver.Remote):
 
     def capabilities_set(self,device_num):
         self.capabilities = {}
-        if device_num == 1:
-            self.capabilities['platformVersion'] = '6.0'
-        if device_num == 2:
-            self.capabilities['platformVersion'] = '7.0'
-            self.capabilities['automationName'] = 'UIAutomator2'
-
         self.capabilities['unicodeKeyboard'] = 'True'
         self.capabilities['platformName'] = 'Android'
         self.capabilities['deviceName'] = 'Android Emulator'
@@ -39,6 +33,17 @@ class UpdateWebDriver(webdriver.Remote):
         self.capabilities['app'] = 'C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\Fota_GL_v7.0.10.3.0655.0_signed_platformkey_alldpi.apk'
         self.capabilities['noReset'] = 'True'
 
+        if device_num == 1:
+            self.capabilities['platformVersion'] = '6.0'
+        if device_num == 2:
+            self.capabilities['platformVersion'] = '7.0'
+            self.capabilities['automationName'] = 'UIAutomator2'
+        if device_num ==99:
+            self.capabilities['platformVersion'] = '7.1.2'
+            self.capabilities['automationName'] = 'UIAutomator2'
+            self.capabilities['appPackage'] = 'com.example.wifireconnecttest'
+            self.capabilities['appActivity'] = 'com.example.wifireconnecttest.MainActivity'
+            self.capabilities['app'] = 'C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\WiFiReconnectTest_v1.0.1.apk'
         return self.capabilities
 
     def allapp_find_app(self,appname):
@@ -73,8 +78,8 @@ class UpdateWebDriver(webdriver.Remote):
     def swape_app2homescreen(self,appname):
         try:
             updateelm1 = self.allapp_find_app(appname)
-        except CantFindAppException, e:
-            print e
+        except CantFindAppException as e:
+            print(e)
         else:
             x = self.get_window_size()['width'] / 2
             y = self.get_window_size()['height'] / 2
@@ -99,8 +104,8 @@ class UpdateWebDriver(webdriver.Remote):
         self.press_keycode(3)
         try:
             self.find_element_by_accessibility_id(appname).click()
-        except NoSuchElementException,e:
-            print e
+        except NoSuchElementException as e:
+            print(e)
             return False
         else:
             return True
@@ -142,7 +147,7 @@ class UpdateWebDriver(webdriver.Remote):
         for i in range(1,10):
             try:
                 pwdinput = self.find_element_by_android_uiautomator('new UiSelector().className("android.widget.EditText")')
-            except NoSuchElementException, e:
+            except NoSuchElementException as e:
                 cfu_elm.click()
                 time.sleep(1)
             else:
@@ -150,15 +155,15 @@ class UpdateWebDriver(webdriver.Remote):
                 break
         try:
             self.find_element_by_id("android:id/button1").click()
-        except NoSuchElementException, e:
-            print "advance mode already enabled"
+        except NoSuchElementException:
+            print("advance mode already enabled")
         else:
             pass
         self.press_keycode(4)
         try:
             self.find_element_by_android_uiautomator('new UiSelector().text("Password incorrect")')
-        except NoSuchElementException,e:
-            print "open fota advance mode success"
+        except NoSuchElementException:
+            print("open fota advance mode success")
             self.find_element_by_accessibility_id("More options").click()
             self.find_element_by_android_uiautomator('new UiSelector().text("FOTA test")').click()
             self.find_element_by_id("android:id/switchWidget").click()
@@ -172,13 +177,13 @@ class UpdateWebDriver(webdriver.Remote):
             self.find_element_by_android_uiautomator('new UiSelector().className("android.widget.EditText")').send_keys(self.imei)
             self.find_element_by_id("android:id/button1").click()
             self.find_element_by_android_uiautomator('new UiSelector().text("Start Test")').click()
-            print self.current_activity
+            print(self.current_activity)
             time.sleep(3)
             return True
 
 
         else:
-            print "failed to open fota advance mode"
+            print("failed to open fota advance mode")
             return False
 
 
@@ -189,10 +194,10 @@ class UpdateWebDriver(webdriver.Remote):
         self.find_element_by_accessibility_id("More options").click()
         self.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
         try:
-            print "try to find package in setting"
+            print("try to find package in setting")
             delete_icon = self.find_element_by_id("com.tcl.ota:id/pref_button")
-        except NoSuchElementException,e:
-            print " no package"
+        except NoSuchElementException:
+            print(" no package")
             pass
         else:
             delete_icon.click()
@@ -210,7 +215,7 @@ class UpdateWebDriver(webdriver.Remote):
                 try:
                     download_button  = device.find_element_by_id("com.tcl.ota:id/firmware_update")
                     button_text = download_button.get_attribute("text")
-                except NoSuchElementException, e:
+                except NoSuchElementException:
                     time.sleep(5)
                 else:
                     if button_text == u"CHECK FOR UPDATES NOW":    #状态是未check差分包时点击搜索按钮
@@ -234,8 +239,8 @@ class UpdateWebDriver(webdriver.Remote):
                             try:
                                 device.find_elements_by_android_uiautomator(
                                     'new UiSelector().text("System update available")')
-                            except NoSuchElementException, e:
-                                print "there are no notification "
+                            except NoSuchElementException:
+                                print("there are no notification ")
                                 return False
                             else:
                                 return device.find_element_by_accessibility_id("Download")
@@ -251,7 +256,7 @@ class UpdateWebDriver(webdriver.Remote):
     def fill_ram(self):  #fill ram
         self.install_app("C:\\Users\\77465\\eclipse-workspace\\appiumdemo\\apps\\fill.apk")
         if not self.is_app_installed("com.tcl.fill"):
-            print "can not install fill.apk"
+            print("can not install fill.apk")
 
         self.allapp_find_app("fill")
         #do fill
@@ -269,28 +274,28 @@ class UpdateWebDriver(webdriver.Remote):
                 self.swape_bygiven("dragdown")
                 try:
                     self.find_element_by_accessibility_id("Mobile No phone. No data. No service.")
-                except NoSuchElementException,e:
+                except NoSuchElementException:
                     pass
                 else:
                     raise HavntInsertSim()
 
                 try:
                     self.find_element_by_accessibility_id("Mobile No signal. No data. No SIM cards.")
-                except NoSuchElementException,e:
+                except NoSuchElementException:
                     pass
                 else:
                     raise HavntInsertSim()
-                print "now try to check the 4g icon"
+                print("now try to check the 4g icon")
 
                 try:
                     data_icon = self.find_element_by_accessibility_id("Mobile Phone four bars.. 4G. CHN-UNICOM.")
 
-                except NoSuchElementException, e:
+                except NoSuchElementException:
                     if network_type == 4:
                         try:
                             data_icon1 = self.find_element_by_accessibility_id("Mobile Phone four bars.. No data. CHN-UNICOM.")
-                        except NoSuchElementException, e:
-                            print "Please insert UNICOM 4G SIM Card"
+                        except NoSuchElementException:
+                            print("Please insert UNICOM 4G SIM Card")
                         else:
                             self.click_dataicon(data_icon1, "Off")
 
@@ -310,7 +315,7 @@ class UpdateWebDriver(webdriver.Remote):
             if network_type == 2 or network_type == 6:
                 try:
                     wifi_button = self.find_element_by_accessibility_id("Wi-Fi Off,Open Wi-Fi settings.")
-                except NoSuchElementException,e:
+                except NoSuchElementException:
                     self.press_keycode(4)
                 else:
                     wifi_button.click()
@@ -321,7 +326,7 @@ class UpdateWebDriver(webdriver.Remote):
             elif network_type == 4 :
                 try:
                     self.find_element_by_accessibility_id("Wi-Fi Off,Open Wi-Fi settings.")
-                except NoSuchElementException, e:
+                except NoSuchElementException:
                     self.find_element_by_android_uiautomator('new UiSelector().descriptionStartsWith("Wi-Fi")').click()
                     self.find_element_by_id("android:id/toggle").click()
                 else:
@@ -329,7 +334,7 @@ class UpdateWebDriver(webdriver.Remote):
                 time.sleep(2)
                 try:
                     self.find_element_by_accessibility_id("No SIM card,Open Cellular data settings.")
-                except NoSuchElementException,e:
+                except NoSuchElementException:
                     data_button = self.find_element_by_android_uiautomator('new UiSelector().descriptionStartsWith("Mobile Mobile Data On")')
                     data_button.click()
                     data_state = self.find_element_by_id("com.android.systemui:id/sim_toggle")
@@ -345,7 +350,7 @@ class UpdateWebDriver(webdriver.Remote):
             elif network_type == 0 :
                 try:
                     self.find_element_by_accessibility_id("No SIM card,Open Cellular data settings.")
-                except NoSuchElementException,e:
+                except NoSuchElementException:
                     data_button = self.find_element_by_accessibility_id("Mobile Mobile Data On. Phone four bars.. China Unicom.,Open Cellular data settings.")
                     data_button.click()
                     time.sleep(1)
@@ -359,22 +364,21 @@ class UpdateWebDriver(webdriver.Remote):
                 else:
                     self.tap_mutiback(2)
             else:
-                print "ERROR:WRONG NETWORK TYPE"
+                print("ERROR:WRONG NETWORK TYPE")
             network_chag_ifo =  "change network to " + str(network_type) + " successfully!"
-            print network_chag_ifo
+            print(network_chag_ifo)
         else:
-            print "ERROR: Now we don't support this android version network change "
+            print("ERROR: Now we don't support this android version network change ")
 
     def click_dataicon(self,data_icon,state):
         data_icon.click()
         data_switch = self.find_element_by_id("android:id/toggle")
-        if (data_switch.get_attribute("text") == unicode(state, "utf-8")):
+        if (data_switch.get_attribute("text") == state):
 
             data_switch.click()
         else:
-            print data_switch.get_attribute("text")
-            print state
-            print unicode(state, "utf-8")
+            print(data_switch.get_attribute("text"))
+            print(state)
         time.sleep(1)
         self.press_keycode(4)
 
@@ -384,7 +388,7 @@ class UpdateWebDriver(webdriver.Remote):
         time.sleep(2)
         self.swape_bygiven("dragdown")  # enter setting and change the system time.
         time.sleep(2)
-        print "now drag down the noti"
+        print("now drag down the noti")
         self.find_element_by_accessibility_id("Settings").click()
         self.swape_findelm("allappdown", 'new UiSelector().text("Date & time")',
                              MobileBy.ANDROID_UIAUTOMATOR).click()
@@ -408,7 +412,7 @@ class UpdateWebDriver(webdriver.Remote):
                 next_dat_in = int(now_day) + 1
                 next_day = 'new UiSelector().text("' + str(next_dat_in) + '")'
                 next_day_elm = self.find_element_by_android_uiautomator(next_day)
-            except NoSuchElementException, e:
+            except NoSuchElementException:
                 self.swape_bygiven( "right2left")
                 self.find_element_by_android_uiautomator('new UiSelector().text("1")').click()
             else:
@@ -441,7 +445,7 @@ class UpdateWebDriver(webdriver.Remote):
             time.sleep(internal)
             applist = self.find_elements(by,value)
             if len(applist) != 0:
-                print "ele name find successfully"
+                print("ele name find successfully")
                 return applist
             if i == (times - 1):
                 return []

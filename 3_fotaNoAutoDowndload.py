@@ -25,7 +25,7 @@ class AppTest(unittest.TestCase):
         self.wd.find_element_by_android_uiautomator('new UiSelector().text("Settings")').click()
         elm1 = self.wd.find_elements_by_class_name("android.widget.Switch")
         str1 = elm1[0].get_attribute("text")
-        print "%r" %str1
+        print("%r" %str1)
         if str1 == u'On':
             elm1[0].click()
         self.wd.press_keycode(4)
@@ -36,17 +36,17 @@ class AppTest(unittest.TestCase):
             while (True):
                 try:
                     elm2 = self.wd.find_element_by_id("com.tcl.ota:id/firmware_update")
-                except NoSuchElementException, e:
+                except NoSuchElementException:
                     time.sleep(5)
                 else:
                     if (elm2.get_attribute("text") != u"CHECK FOR UPDATES NOW"):
                         svn_value = self.wd.find_element_by_id("com.tcl.ota:id/firmware_system_version").get_attribute("text")
                         self.assertEqual(svn_value, u"6.0-01007")
                         package_size = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text")
-                        print "%r" %package_size
+                        print("%r" %package_size)
                         self.assertEqual(package_size, u'01008\x08(51.1 MB)')
                         state_message = self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message").get_attribute("text")
-                        print "%r" %state_message
+                        print("%r" %state_message)
                         self.assertEqual(state_message, u"System update available")
                         #self.wd.find_element_by_id("com.tcl.ota:id/firmware_info").click()
                         #detail_title = self.wd.find_element_by_id("com.tcl.ota:id/firmware_detail_title_shadow")
@@ -73,7 +73,7 @@ class AppTest(unittest.TestCase):
         try:
             fota_noti = self.wd.find_element_by_android_uiautomator(
                 'new UiSelector().text("System update available")')
-        except NoSuchElementException, e:
+        except NoSuchElementException:
             pass
         else:
             fota_noti.click()
@@ -112,7 +112,7 @@ class AppTest(unittest.TestCase):
             self.wd.find_element_by_id("com.tcl.ota:id/firmware_state_message_extra").get_attribute("text"),
             u'01008\x08(51.1 MB)')
         self.assertEqual(self.wd.find_element_by_id("com.tcl.ota:id/firmware_update").get_attribute("text"),
-                         u"DOWNLOAD UPDATE")
+                         "DOWNLOAD UPDATE")
         #self.wd.fill_ram()     #now will not add the fill ram function
         #self.wd.click_checkfota( 0, 2)
 
