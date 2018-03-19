@@ -165,10 +165,18 @@ class AppTest(unittest.TestCase):
             'new UiSelector().resourceId("com.tcl.ota:id/update_button")', MobileBy.ANDROID_UIAUTOMATOR, 5, 1)
         self.assertEqual(now_applist_state[0].get_attribute("text"), u"PAUSE")
 
+        #self.aota_applist_load(1, 4)    #Wi-Fi autodownload and network 4
 
+        #self.aota_applist_load(1, 2)    #Wi-Fi autodownload and network 2
 
+        #self.aota_applist_load(2, 4)    #2:Using Wi-Fi & DATA and network 4
 
-        applist_t[0]
+        #self.aota_applist_load(2, 2)    #2:Using Wi-Fi & DATA and network 2
+
+        #self.aota_applist_load(0, 2)    #0:NEVER and network 4
+
+        #self.aota_applist_load(0, 4)    #0:NEVER and network 2
+
 
 
 
@@ -375,6 +383,9 @@ class AppTest(unittest.TestCase):
                             installing_app_state.click()
                     time.sleep(5)
                 break
+    def check_aotaautodownload(self):
+        now_applist_state = self.wd.try_findeletimes(
+            'new UiSelector().resourceId("com.tcl.ota:id/update_button")', MobileBy.ANDROID_UIAUTOMATOR, 5, 1)
 
 if __name__ == '__main__':
     unittest.main()
